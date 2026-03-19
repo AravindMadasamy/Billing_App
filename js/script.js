@@ -863,6 +863,95 @@ function initBillingPOS() {
     });
   }
 
+  const generateBillBtn = document.getElementById("posGenerateBillBtn");
+  if (generateBillBtn) {
+    generateBillBtn.addEventListener("click", () => {
+      if (items.size === 0) {
+        showToast("Cart is empty!", "error");
+        return;
+      }
+      
+      const sub = Array.from(items.values()).reduce((sum, item) => sum + item.price * item.qty, 0);
+      const discount = Number(discountInput?.value || 0);
+      const total = sub + (sub * 0.18) - discount;
+      const customerInput = document.getElementById("posCustomerInput");
+
+      // ── Generate Thermal Receipt for Printing ──
+      let receiptHTML = `
+        <div id="printReceipt">
+          <div class="receipt-header">
+            <h2>SRI AYYAN FURNITURE</h2>
+            <div>Tax Invoice</div>
+            <div>Date: ${new Date().toLocaleString()}</div>
+            ${customerInput?.value ? `<div>Customer: ${customerInput.value}</div>` : ''}
+          </div>
+          <table class="receipt-table">
+            <thead>
+              <tr><th>Item</th><th>Qty</th><th>Total</th></tr>
+            </thead>
+            <tbody>
+      `;
+      items.forEach((item) => {
+        receiptHTML += `<tr><td>${item.name}</td><td>${item.qty}</td><td>${item.price * item.qty}</td></tr>`;
+      });
+      receiptHTML += `
+            </tbody>
+          </table>
+          <div class="receipt-totals">
+            <div>Subtotal: ${money(sub)}</div>
+            <div>GST (18%): ${money(sub * 0.18)}</div>
+            ${discount > 0 ? `<div>Discount: -${money(discount)}</div>` : ''}
+            <div class="receipt-grand">Total: ${money(total)}</div>
+            <div class="receipt-footer">Thank you for your business!</div>
+          </div>
+        </div>
+      `;
+      
+      const modal = document.getElementById("posReceiptModal");
+      const paper = document.getElementById("posReceiptPaper");
+      if (modal && paper) {
+        paper.innerHTML = receiptHTML;
+        modal.classList.add("open");
+        modal.setAttribute("aria-hidden", "false");
+      }
+    });
+  }
+
+  // ── Receipt Modal Actions ──
+  const receiptModal = document.getElementById("posReceiptModal");
+  function closeReceiptPreview() {
+    if (receiptModal) {
+      receiptModal.classList.remove("open");
+      receiptModal.setAttribute("aria-hidden", "true");
+    }
+  }
+
+  document.getElementById("posCloseReceiptBtn")?.addEventListener("click", closeReceiptPreview);
+  document.getElementById("posCancelReceiptBtn")?.addEventListener("click", closeReceiptPreview);
+
+  document.getElementById("posPrintReceiptBtn")?.addEventListener("click", () => {
+    // 1. Print it natively
+    window.print();
+    
+    // 2. Wrap up
+    closeReceiptPreview();
+    
+    const sub = Array.from(items.values()).reduce((sum, item) => sum + item.price * item.qty, 0);
+    const discount = Number(discountInput?.value || 0);
+    const total = sub + (sub * 0.18) - discount;
+    
+    showToast("Bill Generated: " + money(total), "success");
+    
+    items.clear();
+    selectedBarcode = "";
+    if (discountInput) discountInput.value = 0;
+    const customerInput = document.getElementById("posCustomerInput");
+    if (customerInput) customerInput.value = "";
+    
+    renderBill();
+    selectRow("");
+  });
+
   function pushHistory(product) {
     const idx = history.findIndex((h) => h.barcode === product.barcode);
     if (idx >= 0) history.splice(idx, 1);
