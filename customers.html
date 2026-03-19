@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SRI AYYAN Billing | Customers</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="customers">
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar__header">
+        <a class="brand" href="dashboard.html">
+          <span class="brand__mark">SA</span>
+          <div class="brand__text">
+            <strong>SRI AYYAN</strong>
+            <span>Furniture Billing</span>
+          </div>
+        </a>
+        <button class="icon-btn sidebar-toggle desktop-only" id="sidebarToggle" aria-label="Toggle sidebar">
+          <span></span>
+          <span></span>
+        </button>
+      </div>
+      <nav class="sidebar__nav">
+        <a href="dashboard.html" class="nav-link"><span>Dashboard</span></a>
+        <a href="products.html" class="nav-link"><span>Products</span></a>
+        <a href="customers.html" class="nav-link active"><span>Customers</span></a>
+        <a href="billing.html" class="nav-link"><span>Billing</span></a>
+        <a href="invoice.html" class="nav-link"><span>Reports</span></a>
+        <a href="settings.html" class="nav-link"><span>Settings</span></a>
+      </nav>
+      <div class="sidebar__footer">
+        <div class="theme-switch">
+          <span>Theme</span>
+          <button class="switch" id="themeToggle" aria-label="Toggle theme"></button>
+        </div>
+      </div>
+    </aside>
+
+    <div class="main-panel">
+      <header class="topbar">
+        <button class="icon-btn mobile-only" id="mobileSidebarToggle" aria-label="Open menu">
+          <span></span>
+          <span></span>
+        </button>
+        <div class="searchbar">
+          <input type="search" placeholder="Search customers, phone, city...">
+        </div>
+        <div class="topbar__actions">
+          <button class="icon-btn bell-btn" aria-label="Notifications">
+            <span class="dot"></span>
+          </button>
+          <div class="profile-menu">
+            <button class="profile-menu__trigger" id="profileTrigger">
+              <div class="avatar">A</div>
+              <div>
+                <strong>Admin User</strong>
+                <span>Customer Desk</span>
+              </div>
+            </button>
+            <div class="profile-dropdown" id="profileDropdown">
+              <a href="#">Profile</a>
+              <a href="settings.html">Customer Settings</a>
+              <a href="#">Logout</a>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main class="content">
+        <section class="page-heading">
+          <div>
+            <p class="eyebrow">Customer Registry</p>
+            <h1>Customers</h1>
+            <p class="muted">Keep buyer information organized for quick billing and follow-ups.</p>
+          </div>
+          <button class="btn btn-primary" data-modal-target="customerModal">Add Customer</button>
+        </section>
+
+        <section class="card-grid">
+          <article class="mini-card"><span>New This Week</span><strong>42</strong></article>
+          <article class="mini-card"><span>Repeat Buyers</span><strong>68%</strong></article>
+          <article class="mini-card"><span>High Value Clients</span><strong>124</strong></article>
+        </section>
+
+        <section class="panel">
+          <div class="table-wrap">
+            <table id="customersTable">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Phone</th>
+                  <th>Address</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>Sneha Verma</td><td>+91 98765 43210</td><td>12 Lake View Road, Pune</td></tr>
+                <tr><td>Amit Joshi</td><td>+91 99887 66554</td><td>44 Green Park, Jaipur</td></tr>
+                <tr><td>Karan Malhotra</td><td>+91 98111 22003</td><td>22 Palm Avenue, Delhi</td></tr>
+                <tr><td>Riya Kapoor</td><td>+91 99000 11223</td><td>7 Cedar Street, Chandigarh</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <div class="modal" id="customerModal">
+    <div class="modal__dialog">
+      <div class="modal__header">
+        <div>
+          <h2>Add Customer</h2>
+          <p class="muted">Capture buyer details for invoice and delivery records.</p>
+        </div>
+        <button class="modal-close" data-modal-close>&times;</button>
+      </div>
+      <form class="modal__body form-grid">
+        <label class="field"><input type="text" placeholder=" " required><span>Customer Name</span></label>
+        <label class="field"><input type="tel" placeholder=" " required><span>Phone Number</span></label>
+        <label class="field full-span"><textarea placeholder=" " rows="4" required></textarea><span>Address</span></label>
+        <div class="modal__actions full-span">
+          <button type="button" class="btn btn-secondary" data-modal-close>Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Customer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <script src="js/script.js"></script>
+</body>
+</html>
+
+
+

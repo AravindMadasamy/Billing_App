@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SRI AYYAN Billing | Settings</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="settings">
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar__header">
+        <a class="brand" href="dashboard.html">
+          <span class="brand__mark">SA</span>
+          <div class="brand__text">
+            <strong>SRI AYYAN</strong>
+            <span>Furniture Billing</span>
+          </div>
+        </a>
+        <button class="icon-btn sidebar-toggle desktop-only" id="sidebarToggle" aria-label="Toggle sidebar">
+          <span></span>
+          <span></span>
+        </button>
+      </div>
+
+      <nav class="sidebar__nav">
+        <a href="dashboard.html" class="nav-link"><span>Dashboard</span></a>
+        <a href="products.html" class="nav-link"><span>Products</span></a>
+        <a href="customers.html" class="nav-link"><span>Customers</span></a>
+        <a href="billing.html" class="nav-link"><span>Billing</span></a>
+        <a href="invoice.html" class="nav-link"><span>Reports</span></a>
+        <a href="settings.html" class="nav-link active"><span>Settings</span></a>
+      </nav>
+
+      <div class="sidebar__footer">
+        <div class="sidebar-metric">
+          <span class="sidebar-metric__label">Business Mode</span>
+          <strong>Retail Billing</strong>
+        </div>
+        <div class="theme-switch">
+          <span>Theme</span>
+          <button class="switch" id="themeToggle" aria-label="Toggle theme"></button>
+        </div>
+      </div>
+    </aside>
+
+    <div class="main-panel">
+      <header class="topbar">
+        <button class="icon-btn mobile-only" id="mobileSidebarToggle" aria-label="Open menu">
+          <span></span>
+          <span></span>
+        </button>
+        <div class="searchbar">
+          <input type="search" placeholder="Search setting, preference, tax...">
+        </div>
+        <div class="topbar__actions topbar__actions--row">
+          <button class="icon-btn bell-btn" aria-label="Notifications">
+            <span class="dot"></span>
+          </button>
+          <div class="profile-menu">
+            <button class="profile-menu__trigger" id="profileTrigger">
+              <div class="avatar">A</div>
+              <div>
+                <strong>Admin User</strong>
+                <span>System Settings</span>
+              </div>
+            </button>
+            <div class="profile-dropdown" id="profileDropdown">
+              <a href="settings.html">Account Settings</a>
+              <a href="invoice.html">Reports</a>
+              <a href="#">Logout</a>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main class="content">
+        <section class="hero-band hero-band--compact">
+          <div>
+            <p class="eyebrow">Settings</p>
+            <h1>Business Preferences</h1>
+            <p class="muted">Manage store details, billing preferences, tax rules and invoice behavior from one place.</p>
+          </div>
+          <div class="hero-band__actions">
+            <button class="btn btn-primary">Save Changes</button>
+            <a href="invoice.html" class="btn btn-secondary">View Reports</a>
+          </div>
+        </section>
+
+        <section class="dashboard-grid">
+          <article class="panel">
+            <div class="panel__head">
+              <div>
+                <h2>Store Details</h2>
+                <p class="muted">Basic business information</p>
+              </div>
+            </div>
+            <div class="modal__body">
+              <label class="field"><input type="text" placeholder=" " value="SRI AYYAN"><span>Shop Name</span></label>
+              <label class="field"><input type="text" placeholder=" " value="+91 90000 44556"><span>Phone Number</span></label>
+              <label class="field full-span"><textarea placeholder=" " rows="4">221 Artisan Avenue, Bengaluru, India</textarea><span>Business Address</span></label>
+            </div>
+          </article>
+
+          <article class="panel">
+            <div class="panel__head">
+              <div>
+                <h2>Billing Preferences</h2>
+                <p class="muted">Tax and invoice options</p>
+              </div>
+            </div>
+            <div class="stack">
+              <div class="selection-note">
+                <strong>Default GST</strong>
+                <span>18% applied on all retail bills.</span>
+              </div>
+              <div class="selection-note">
+                <strong>Invoice Format</strong>
+                <span>A4 printable invoice layout is enabled.</span>
+              </div>
+              <div class="selection-note">
+                <strong>Theme Preference</strong>
+                <span>Use the sidebar toggle to switch between light and dark themes.</span>
+              </div>
+            </div>
+          </article>
+        </section>
+      </main>
+    </div>
+  </div>
+  <script src="js/script.js"></script>
+</body>
+</html>
+
+
+

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SRI AYYAN Billing | Invoice</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="invoice">
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar__header">
+        <a class="brand" href="dashboard.html">
+          <span class="brand__mark">SA</span>
+          <div class="brand__text">
+            <strong>SRI AYYAN</strong>
+            <span>Furniture Billing</span>
+          </div>
+        </a>
+        <button class="icon-btn sidebar-toggle desktop-only" id="sidebarToggle" aria-label="Toggle sidebar">
+          <span></span>
+          <span></span>
+        </button>
+      </div>
+
+      <nav class="sidebar__nav">
+        <a href="dashboard.html" class="nav-link"><span>Dashboard</span></a>
+        <a href="products.html" class="nav-link"><span>Products</span></a>
+        <a href="customers.html" class="nav-link"><span>Customers</span></a>
+        <a href="billing.html" class="nav-link"><span>Billing</span></a>
+        <a href="invoice.html" class="nav-link active"><span>Reports</span></a>
+        <a href="settings.html" class="nav-link"><span>Settings</span></a>
+      </nav>
+
+      <div class="sidebar__footer">
+        <div class="sidebar-metric">
+          <span class="sidebar-metric__label">Printed Today</span>
+          <strong>16 Invoices</strong>
+        </div>
+        <div class="theme-switch">
+          <span>Theme</span>
+          <button class="switch" id="themeToggle" aria-label="Toggle theme"></button>
+        </div>
+      </div>
+    </aside>
+
+    <div class="main-panel">
+      <header class="topbar">
+        <button class="icon-btn mobile-only" id="mobileSidebarToggle" aria-label="Open menu">
+          <span></span>
+          <span></span>
+        </button>
+        <div class="searchbar">
+          <input type="search" placeholder="Search invoice, customer, amount...">
+        </div>
+        <div class="topbar__actions topbar__actions--row">
+          <button class="icon-btn bell-btn" aria-label="Notifications">
+            <span class="dot"></span>
+          </button>
+          <div class="profile-menu">
+            <button class="profile-menu__trigger" id="profileTrigger">
+              <div class="avatar">A</div>
+              <div>
+                <strong>Admin User</strong>
+                <span>Reports Desk</span>
+              </div>
+            </button>
+            <div class="profile-dropdown" id="profileDropdown">
+              <a href="invoice.html">Invoice Reports</a>
+              <a href="settings.html">Print Settings</a>
+              <a href="#">Logout</a>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main class="content">
+        <section class="hero-band hero-band--compact no-print">
+          <div>
+            <p class="eyebrow">Reports</p>
+            <h1>Invoice Preview</h1>
+            <p class="muted">Review the printable invoice layout before sharing or printing it.</p>
+          </div>
+          <div class="hero-band__actions">
+            <a href="billing.html" class="btn btn-secondary">Back to Billing</a>
+            <button class="btn btn-primary" id="printInvoice">Print Invoice</button>
+          </div>
+        </section>
+
+        <section class="invoice-page">
+          <section class="invoice-paper">
+            <div class="invoice-header">
+              <div>
+                <p class="eyebrow">Furniture Shop Billing Software</p>
+                <h1>SRI AYYAN</h1>
+                <p class="muted">221 Artisan Avenue, Bengaluru, India</p>
+              </div>
+              <div class="invoice-meta">
+                <span>Invoice No: INV-3021</span>
+                <span>Date: 17 Mar 2026</span>
+                <span>GSTIN: 29ABCDE1234F1Z5</span>
+              </div>
+            </div>
+
+            <div class="invoice-details">
+              <article>
+                <h2>Billed To</h2>
+                <p>Sneha Verma</p>
+                <p>+91 98765 43210</p>
+                <p>12 Lake View Road, Pune</p>
+              </article>
+              <article>
+                <h2>Shop Contact</h2>
+                <p>support@sriayyan.com</p>
+                <p>+91 90000 44556</p>
+                <p>Mon to Sat, 9 AM to 8 PM</p>
+              </article>
+            </div>
+
+            <div class="table-wrap invoice-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Product</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                    <th>Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td>Royal Sofa Set</td><td>1</td><td>Rs. 32,000</td><td>Rs. 32,000</td></tr>
+                  <tr><td>Accent Chair</td><td>2</td><td>Rs. 8,600</td><td>Rs. 17,200</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="invoice-total">
+              <div class="summary-row"><span>Subtotal</span><strong>Rs. 49,200</strong></div>
+              <div class="summary-row"><span>GST (18%)</span><strong>Rs. 8,856</strong></div>
+              <div class="summary-row grand"><span>Total Amount</span><strong>Rs. 58,056</strong></div>
+            </div>
+
+            <footer class="invoice-footer">
+              <p>Thank you for choosing SRI AYYAN.</p>
+              <p class="muted">This is a computer-generated invoice prepared for frontend UI preview.</p>
+            </footer>
+          </section>
+        </section>
+      </main>
+    </div>
+  </div>
+  <script src="js/script.js"></script>
+</body>
+</html>
+
+
+
+

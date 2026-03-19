@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SRI AYYAN | POS Billing</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* =========================================
+       POS-SPECIFIC LAYOUT — fully self-contained
+       ========================================= */
+    html, body { height: 100%; margin: 0; padding: 0; }
+
+    /* Override main panel to be a full-height flex column */
+    body[data-page="billing"] .main-panel {
+      padding: 0 !important;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Make the topbar flat (no border-radius, no shadow) */
+    body[data-page="billing"] .topbar {
+      border-radius: 0 !important;
+      border-left: none;
+      border-right: none;
+      border-top: none;
+      flex-shrink: 0;
+    }
+
+    /* ── POS Shell (fills remaining height) ── */
+    .pos-shell {
+      display: flex;
+      flex: 1;
+      min-height: 0;          /* CRITICAL: flex child must shrink */
+      overflow: hidden;
+    }
+
+    /* ═══════════════ LEFT CATALOG PANE ════════════════ */
+    .pos-catalog {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: var(--bg);
+      border-right: 2px solid var(--border);
+    }
+
+    /* Search bar at top of catalog */
+    .pos-search-bar {
+      flex-shrink: 0;
+      display: flex;
+      gap: 0.6rem;
+      align-items: center;
+      padding: 0.9rem 1.2rem;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+    .pos-barcode-input {
+      flex: 1;
+      padding: 0.7rem 1rem;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.95rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .pos-barcode-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(31,111,235,0.12);
+    }
+    .pos-barcode-input::placeholder { color: var(--text-soft); }
+    .pos-scan-msg {
+      flex-shrink: 0;
+      padding: 0.3rem 1.2rem;
+      font-size: 0.78rem;
+      color: var(--text-soft);
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      min-height: 24px;
+    }
+
+    /* Keyboard hint strip */
+    .pos-hotkey-strip {
+      flex-shrink: 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      padding: 0.5rem 1.2rem;
+      background: var(--surface-muted);
+      border-bottom: 1px solid var(--border);
+    }
+    .pos-hotkey-strip span {
+      font-size: 0.72rem;
+      color: var(--text-soft);
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+    .pos-hotkey-strip kbd {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1px 5px;
+      font-size: 0.7rem;
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* Quick product tiles grid */
+    .pos-quick-section {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem 1.2rem;
+    }
+    .pos-quick-section::-webkit-scrollbar { width: 5px; }
+    .pos-quick-section::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    .pos-section-title {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-soft);
+      margin-bottom: 0.75rem;
+    }
+    .pos-quick-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 0.85rem;
+      margin-bottom: 1.2rem;
+    }
+    .pos-quick-card {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
+      padding: 1rem;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 16px;
+      cursor: pointer;
+      transition: border-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+      text-align: left;
+    }
+    .pos-quick-card:hover {
+      border-color: var(--primary);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(31,111,235,0.12);
+    }
+    .pos-quick-card:active { transform: scale(0.97); }
+    .pos-quick-thumb {
+      width: 52px; height: 52px;
+      border-radius: 12px;
+      background: var(--accent);
+      color: var(--primary);
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      font-size: 1rem;
+      letter-spacing: 0.02em;
+      flex-shrink: 0;
+    }
+    .pos-quick-card strong { font-size: 0.82rem; line-height: 1.35; color: var(--text); }
+    .pos-quick-card .pos-tag { font-size: 0.72rem; color: var(--text-soft); }
+    .pos-quick-card .pos-price {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-top: auto;
+    }
+
+    /* Recent scans history */
+    .pos-hist-list { display: flex; flex-direction: column; gap: 0.3rem; margin-bottom: 1.5rem; }
+    .pos-hist-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 0.8rem;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface);
+      cursor: pointer;
+      font-size: 0.82rem;
+      color: var(--text);
+      transition: background 0.15s;
+    }
+    .pos-hist-item:hover { background: var(--accent); }
+    .pos-hist-icon {
+      width: 28px; height: 28px;
+      border-radius: 8px;
+      background: var(--accent);
+      color: var(--primary);
+      display: grid;
+      place-items: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    /* ═══════════════ RIGHT CART PANE ════════════════ */
+    .pos-cart {
+      width: 400px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      background: var(--surface);
+      min-height: 0;           /* CRITICAL */
+      overflow: hidden;
+    }
+
+    /* Customer row */
+    .cart-header {
+      flex-shrink: 0;
+      padding: 0.85rem 1rem;
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface-muted);
+    }
+    .cart-header input {
+      flex: 1;
+      padding: 0.6rem 0.9rem;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.88rem;
+      min-width: 0;
+    }
+    .cart-header input:focus { outline: none; border-color: var(--primary); }
+
+    /* Bill title row */
+    .cart-title-row {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.6rem 1rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+    }
+    .cart-title-row h3 {
+      margin: 0;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text-soft);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .cart-item-count {
+      background: var(--accent);
+      color: var(--primary);
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.15rem 0.5rem;
+      border-radius: 20px;
+    }
+
+    /* Cart items — SCROLLABLE zone */
+    .cart-items {
+      flex: 1;
+      min-height: 0;           /* CRITICAL: makes it scroll properly */
+      overflow-y: auto;
+    }
+    .cart-items::-webkit-scrollbar { width: 4px; }
+    .cart-items::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    /* Empty state */
+    .cart-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      height: 100%;
+      color: var(--text-soft);
+      font-size: 0.88rem;
+      padding: 2rem;
+    }
+    .cart-empty-icon { font-size: 2.5rem; opacity: 0.4; }
+
+    /* Cart item row */
+    .cart-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 0.25rem;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.15s;
+      cursor: pointer;
+    }
+    .cart-row:hover { background: var(--surface-muted); }
+    .cart-row.pos-row-selected { background: rgba(31,111,235,0.07); }
+    .cart-row.row-added { animation: rowFlash 0.5s ease; }
+    @keyframes rowFlash { 0%,100% { background: transparent; } 50% { background: rgba(20,154,98,0.15); } }
+
+    .cart-row-name { font-weight: 600; font-size: 0.85rem; grid-column: 1; }
+    .cart-row-cat  { font-size: 0.75rem; color: var(--text-soft); grid-column: 1; }
+    .cart-row-total { font-weight: 700; font-size: 0.88rem; grid-column: 2; grid-row: 1; text-align: right; }
+
+    .cart-row-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      grid-column: 1;
+      margin-top: 4px;
+    }
+    .qty-btn {
+      width: 26px; height: 26px;
+      border-radius: 7px;
+      background: var(--surface-muted);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      font-size: 1rem;
+      line-height: 1;
+      color: var(--text);
+      transition: background 0.15s;
+    }
+    .qty-btn:hover { background: var(--accent); color: var(--primary); }
+    .pos-qty-input {
+      width: 40px;
+      text-align: center;
+      padding: 3px;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      font-size: 0.85rem;
+      background: var(--bg);
+      color: var(--text);
+    }
+    .cart-row-unit { font-size: 0.72rem; color: var(--text-soft); }
+
+    .remove-btn {
+      font-size: 1rem;
+      color: var(--danger);
+      opacity: 0.55;
+      transition: opacity 0.15s;
+      grid-column: 2;
+      grid-row: 2;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px;
+      align-self: start;
+    }
+    .remove-btn:hover { opacity: 1; }
+
+    /* ── Totals section ── */
+    .cart-totals {
+      flex-shrink: 0;
+      padding: 0.9rem 1rem 0.75rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      background: var(--surface);
+    }
+    .tot-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.88rem;
+    }
+    .tot-row span:first-child { color: var(--text-soft); }
+    .tot-discount {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.88rem;
+    }
+    .tot-discount span:first-child { color: var(--text-soft); }
+    .tot-discount-input {
+      width: 80px;
+      padding: 0.3rem 0.5rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg);
+      color: var(--text);
+      text-align: right;
+      font-size: 0.88rem;
+    }
+    .tot-grand {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding-top: 0.5rem;
+      border-top: 2px solid var(--border);
+      margin-top: 0.25rem;
+    }
+    .tot-grand-label { font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+    .tot-grand-value { font-size: 1.5rem; font-weight: 800; color: var(--primary); letter-spacing: -0.02em; }
+
+    /* ── Payment mode ── */
+    .cart-pay-row {
+      flex-shrink: 0;
+      display: flex;
+      gap: 0.5rem;
+      padding: 0.75rem 1rem;
+      border-top: 1px solid var(--border);
+      background: var(--surface-muted);
+    }
+    .pay-label { flex: 1; cursor: pointer; }
+    .pay-label input { display: none; }
+    .pay-chip {
+      display: block;
+      text-align: center;
+      padding: 0.65rem 0.5rem;
+      border: 1.5px solid var(--border);
+      border-radius: 11px;
+      background: var(--surface);
+      font-size: 0.83rem;
+      font-weight: 600;
+      color: var(--text-soft);
+      transition: all 0.18s;
+      user-select: none;
+    }
+    .pay-label input:checked + .pay-chip {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(31,111,235,0.3);
+    }
+
+    /* ── Generate Bill button ── */
+    .cart-cta {
+      flex-shrink: 0;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 0;
+    }
+    .cart-cta-main {
+      padding: 1.1rem;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      background: var(--success);
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      transition: background 0.18s;
+    }
+    .cart-cta-main:hover { background: #0d845a; }
+    .cart-cta-clear {
+      padding: 1.1rem 1.3rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      background: rgba(207,91,80,0.12);
+      color: var(--danger);
+      border: none;
+      border-left: 1px solid rgba(207,91,80,0.2);
+      cursor: pointer;
+      transition: background 0.18s;
+    }
+    .cart-cta-clear:hover { background: rgba(207,91,80,0.22); }
+
+    /* ── Toast ── */
+    .pos-toast {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      padding: 0.7rem 1.1rem;
+      border-radius: 12px;
+      background: #1a2b1f;
+      color: #fff;
+      font-size: 0.88rem;
+      font-weight: 500;
+      opacity: 0;
+      transform: translateY(8px);
+      pointer-events: none;
+      transition: all 0.22s ease;
+      z-index: 1000;
+      max-width: 280px;
+    }
+    .pos-toast.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+    .pos-toast.error { background: #3a1515; }
+    .pos-toast-action {
+      display: block;
+      margin-top: 6px;
+      font-size: 0.8rem;
+      border: 1px solid rgba(255,255,255,0.4);
+      border-radius: 8px;
+      padding: 3px 10px;
+      background: transparent;
+      color: #fff;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    /* ── Scanner Modal ── */
+    .pos-scanner-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(6px);
+      z-index: 500;
+      align-items: center;
+      justify-content: center;
+    }
+    .pos-scanner-modal.open { display: flex; }
+    .pos-scanner-dialog {
+      background: var(--surface-strong);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 1.5rem;
+      width: 420px;
+      max-width: 95vw;
+    }
+    .pos-scanner-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    .pos-scanner-head h2 { margin: 0; font-size: 1.1rem; }
+    .pos-camera-preview {
+      background: linear-gradient(135deg, #0a1628, #182d44);
+      border-radius: 14px;
+      height: 220px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .pos-scan-line {
+      position: absolute;
+      left: 8%; right: 8%;
+      height: 2px;
+      background: #00e5ff;
+      box-shadow: 0 0 10px #00e5ff;
+      animation: scanAnim 1.8s linear infinite;
+    }
+    .pos-scanning-text { color: rgba(255,255,255,0.4); font-size: 0.85rem; }
+    .pos-scanner-actions { margin-top: 1rem; display: flex; justify-content: center; }
+    @keyframes scanAnim { 0%,100% { top: 8%; } 50% { top: 85%; } }
+    @keyframes rowHighlight { 0%,100% { background: transparent; } 50% { background: rgba(47,173,125,0.18); } }
+
+    /* ── Flash on success ── */
+    .success-flash { animation: successPulse 0.3s ease; }
+    @keyframes successPulse { 0%,100% { box-shadow: none; } 50% { box-shadow: 0 0 0 3px rgba(20,154,98,0.45) inset; } }
+
+    /* ── Buttons ── */
+    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 0.6rem 1rem; border-radius: 10px; font-size: 0.88rem; font-weight: 600; border: none; cursor: pointer; transition: all 0.18s; font-family: 'Inter', sans-serif; }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-strong); }
+    .btn-secondary { background: var(--surface-muted); color: var(--text); border: 1px solid var(--border); }
+    .btn-secondary:hover { background: var(--border); }
+    .btn-success { background: var(--success); color: #fff; }
+    .btn-success:hover { background: #0d845a; }
+    .btn-danger { background: rgba(207,91,80,0.12); color: var(--danger); border: 1px solid rgba(207,91,80,0.25); }
+    .btn-danger:hover { background: rgba(207,91,80,0.22); }
+
+    /* ── Responsive ── */
+    @media (max-width: 900px) {
+      body[data-page="billing"] .main-panel { height: auto; overflow: visible; }
+      .pos-shell { flex-direction: column; overflow: visible; }
+      .pos-catalog { overflow: visible; flex: none; }
+      .pos-cart { width: 100%; overflow: visible; }
+      .cart-items { max-height: 320px; }
+    }
+  </style>
+</head>
+<body data-page="billing">
+<div class="app-shell">
+
+  <!-- ════ Sidebar ════ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar__header">
+      <a class="brand" href="dashboard.html">
+        <span class="brand__mark">SA</span>
+        <div class="brand__text">
+          <strong>SRI AYYAN</strong>
+          <span>Furniture</span>
+        </div>
+      </a>
+      <button class="icon-btn sidebar-toggle desktop-only" id="sidebarToggle" aria-label="Toggle sidebar">
+        <span></span><span></span>
+      </button>
+    </div>
+    <nav class="sidebar__nav">
+      <a href="dashboard.html"  class="nav-link"><span class="nav-link__icon">DB</span><span>Dashboard</span></a>
+      <a href="products.html"   class="nav-link"><span class="nav-link__icon">PR</span><span>Products</span></a>
+      <a href="customers.html"  class="nav-link"><span class="nav-link__icon">CU</span><span>Customers</span></a>
+      <a href="billing.html"    class="nav-link active"><span class="nav-link__icon">BL</span><span>Billing</span></a>
+      <a href="invoice.html"    class="nav-link"><span class="nav-link__icon">RP</span><span>Reports</span></a>
+      <a href="settings.html"   class="nav-link"><span class="nav-link__icon">ST</span><span>Settings</span></a>
+    </nav>
+    <div class="sidebar__footer">
+      <div class="sidebar-metric">
+        <span class="sidebar-metric__label">Open Bills</span>
+        <strong>12 Active</strong>
+      </div>
+      <div class="theme-switch">
+        <span>Theme</span>
+        <button class="switch" id="themeToggle" aria-label="Toggle theme"></button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ════ Main Panel ════ -->
+  <div class="main-panel">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <button class="icon-btn mobile-only" id="mobileSidebarToggle" aria-label="Open menu">
+        <span></span><span></span>
+      </button>
+      <div class="searchbar">
+        <input type="search" id="topSearch" placeholder="Search invoice, customer, item...">
+      </div>
+      <div class="topbar__actions topbar__actions--row">
+        <select id="languageSwitch" class="select-control language-switch" aria-label="Language switch">
+          <option value="en">English</option>
+          <option value="ta">Tamil</option>
+          <option value="hi">Hindi</option>
+        </select>
+        <button class="icon-btn bell-btn" aria-label="Notifications"><span class="dot"></span></button>
+        <div class="profile-menu">
+          <button class="profile-menu__trigger" id="profileTrigger">
+            <div class="avatar">A</div>
+            <div><strong>Admin</strong><span>POS Desk</span></div>
+          </button>
+          <div class="profile-dropdown" id="profileDropdown">
+            <a href="settings.html">Settings</a>
+            <a href="#">Invoices</a>
+            <a href="#">Logout</a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ════ POS Shell ════ -->
+    <div class="pos-shell">
+
+      <!-- ══ LEFT: Catalog ══ -->
+      <div class="pos-catalog" id="posBarcodePanel">
+
+        <!-- Barcode / Search Row -->
+        <div class="pos-search-bar">
+          <input id="posBarcodeInput" class="pos-barcode-input"
+                 type="text" placeholder="🔍  Scan barcode or type product name…"
+                 autocomplete="off" spellcheck="false">
+          <button id="posScanBtn" class="btn btn-primary" type="button">Scan</button>
+          <button id="posClearBtn" class="btn btn-secondary" type="button">Clear</button>
+          <button id="posOpenScannerBtn" class="btn btn-success" type="button">📷</button>
+        </div>
+
+        <!-- Status message -->
+        <div id="posScanMessage" class="pos-scan-msg" aria-live="polite"></div>
+
+        <!-- Keyboard shortcuts -->
+        <div class="pos-hotkey-strip">
+          <span><kbd>Enter</kbd> Scan</span>
+          <span><kbd>Ctrl+1–6</kbd> Quick Add</span>
+          <span><kbd>↑↓</kbd> Select</span>
+          <span><kbd>+ / –</kbd> Qty</span>
+          <span><kbd>Del</kbd> Remove</span>
+          <span><kbd>/</kbd> Focus</span>
+        </div>
+
+        <!-- Quick Products + History (scrollable area) -->
+        <div class="pos-quick-section">
+          <div class="pos-section-title">Quick Add — Top Products</div>
+          <div id="posQuickGrid" class="pos-quick-grid"></div>
+
+          <div class="pos-section-title" style="margin-top:1.2rem;">Recently Scanned</div>
+          <div id="posHistoryList" class="pos-hist-list"></div>
+        </div>
+
+      </div><!-- /pos-catalog -->
+
+      <!-- ══ RIGHT: Cart ══ -->
+      <div class="pos-cart">
+
+        <!-- Customer -->
+        <div class="cart-header">
+          <input type="tel" id="posCustomerInput" placeholder="👤  Customer phone or name">
+          <button class="btn btn-secondary" style="padding:0.55rem 0.9rem; font-size:0.82rem;" type="button">Assign</button>
+        </div>
+
+        <!-- Cart label -->
+        <div class="cart-title-row">
+          <h3>Current Order</h3>
+          <span class="cart-item-count" id="posItemCount">0 items</span>
+        </div>
+
+        <!-- Cart items — this scrolls! -->
+        <div class="cart-items" id="posCartItems">
+          <div class="cart-empty" id="posCartEmpty">
+            <span class="cart-empty-icon">🛒</span>
+            <span>No items added yet.</span>
+            <span style="font-size:0.78rem; color:var(--text-soft);">Scan a barcode or tap a product card.</span>
+          </div>
+          <!-- Rows injected by JS -->
+        </div>
+
+        <!-- Totals -->
+        <div class="cart-totals">
+          <div class="tot-row"><span>Subtotal</span><span id="posSubtotal">Rs. 0</span></div>
+          <div class="tot-row"><span>GST (18%)</span><span id="posGst">Rs. 0</span></div>
+          <div class="tot-discount">
+            <span>Discount (Rs.)</span>
+            <input type="number" id="posDiscountInput" class="tot-discount-input" min="0" step="1" value="0">
+          </div>
+          <div class="tot-grand">
+            <span class="tot-grand-label">Grand Total</span>
+            <span class="tot-grand-value" id="posGrandTotal">Rs. 0</span>
+          </div>
+        </div>
+
+        <!-- Payment mode -->
+        <div class="cart-pay-row">
+          <label class="pay-label"><input type="radio" name="paymentType" value="cash" checked><span class="pay-chip">💵 Cash</span></label>
+          <label class="pay-label"><input type="radio" name="paymentType" value="upi"><span class="pay-chip">📱 UPI</span></label>
+          <label class="pay-label"><input type="radio" name="paymentType" value="card"><span class="pay-chip">💳 Card</span></label>
+        </div>
+
+        <!-- CTA -->
+        <div class="cart-cta">
+          <button class="cart-cta-main" type="button">✅&nbsp; Charge &amp; Generate Bill</button>
+          <button class="cart-cta-clear" id="posClearBillBtn" type="button">🗑 Clear</button>
+        </div>
+
+      </div><!-- /pos-cart -->
+
+    </div><!-- /pos-shell -->
+
+  </div><!-- /main-panel -->
+</div><!-- /app-shell -->
+
+<!-- Scanner Modal -->
+<div id="posScannerModal" class="pos-scanner-modal" aria-hidden="true">
+  <div class="pos-scanner-dialog">
+    <div class="pos-scanner-head">
+      <h2>Live Scanner</h2>
+      <button id="posCloseScannerBtn" class="btn btn-secondary" type="button">✕ Close</button>
+    </div>
+    <div class="pos-camera-preview">
+      <div class="pos-scan-line"></div>
+      <div class="pos-scanning-text">Point camera at barcode…</div>
+    </div>
+    <div class="pos-scanner-actions">
+      <button id="posSimulateScanBtn" class="btn btn-primary" type="button">Simulate Scan</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="posToast" class="pos-toast" role="status" aria-live="polite"></div>
+
+<script src="js/script.js"></script>
+<script>
+  /* ── POS Cart Renderer (new DOM structure) ── */
+  window.__posNewCart = true;   // flag for script.js to skip its own renderBill
+
+  const money = v => `Rs. ${Number(v).toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
+
+  function posRenderCart(items, selectedBarcode, totals) {
+    const container = document.getElementById("posCartItems");
+    const empty     = document.getElementById("posCartEmpty");
+    const countEl   = document.getElementById("posItemCount");
+    if (!container) return;
+
+    // Remove all rows except the empty div
+    [...container.querySelectorAll(".cart-row")].forEach(r => r.remove());
+
+    const count = items.size;
+    if (countEl) countEl.textContent = count + (count === 1 ? " item" : " items");
+
+    if (count === 0) {
+      if (empty) empty.style.display = "flex";
+      return;
+    }
+    if (empty) empty.style.display = "none";
+
+    items.forEach((item, barcode) => {
+      const row = document.createElement("div");
+      row.className = "cart-row" + (barcode === selectedBarcode ? " pos-row-selected" : "");
+      row.dataset.barcode = barcode;
+      row.innerHTML = `
+        <span class="cart-row-name">${item.name}</span>
+        <span class="cart-row-total">${money(item.price * item.qty)}</span>
+        <span class="cart-row-cat">${item.category}</span>
+        <button class="remove-btn" data-remove="${barcode}" title="Remove">✕</button>
+        <div class="cart-row-controls">
+          <button class="qty-btn pos-qty-minus" data-barcode="${barcode}">−</button>
+          <input class="pos-qty-input" type="number" min="1" value="${item.qty}" data-barcode="${barcode}">
+          <button class="qty-btn pos-qty-plus" data-barcode="${barcode}">+</button>
+          <span class="cart-row-unit">× ${money(item.price)}</span>
+        </div>
+      `;
+      container.appendChild(row);
+    });
+
+    // Totals
+    if (totals) {
+      document.getElementById("posSubtotal").textContent   = money(totals.subtotal);
+      document.getElementById("posGst").textContent        = money(totals.gst);
+      document.getElementById("posGrandTotal").textContent = money(totals.grand);
+    }
+  }
+
+  // Expose globally so script.js POS can call it
+  window.posRenderCart = posRenderCart;
+</script>
+</body>
+</html>

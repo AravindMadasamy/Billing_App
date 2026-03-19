@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SRI AYYAN Billing | Dashboard</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="dashboard">
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar__header">
+        <a class="brand" href="dashboard.html">
+          <span class="brand__mark">SA</span>
+          <div class="brand__text">
+            <strong>SRI AYYAN</strong>
+            <span>Furniture Billing</span>
+          </div>
+        </a>
+        <button class="icon-btn sidebar-toggle desktop-only" id="sidebarToggle" aria-label="Toggle sidebar">
+          <span></span>
+          <span></span>
+        </button>
+      </div>
+
+      <nav class="sidebar__nav">
+        <a href="index.html" class="nav-link"><span class="nav-link__icon">🌐</span><span>View Storefront</span></a>
+        <a href="dashboard.html" class="nav-link active"><span class="nav-link__icon">DB</span><span>Dashboard</span></a>
+        <a href="products.html" class="nav-link"><span class="nav-link__icon">PR</span><span>Products</span></a>
+        <a href="customers.html" class="nav-link"><span class="nav-link__icon">CU</span><span>Customers</span></a>
+        <a href="billing.html" class="nav-link"><span class="nav-link__icon">BL</span><span>Billing</span></a>
+        <a href="invoice.html" class="nav-link"><span class="nav-link__icon">RP</span><span>Reports</span></a>
+        <a href="settings.html" class="nav-link"><span class="nav-link__icon">ST</span><span>Settings</span></a>
+      </nav>
+
+      <div class="sidebar__footer">
+        <div class="sidebar-metric">
+          <span class="sidebar-metric__label">Cash In Hand</span>
+          <strong>Rs. 1,84,230</strong>
+        </div>
+        <div class="theme-switch">
+          <span>Theme</span>
+          <button class="switch" id="themeToggle" aria-label="Toggle theme"></button>
+        </div>
+      </div>
+    </aside>
+
+    <div class="main-panel">
+      <header class="topbar">
+        <button class="icon-btn mobile-only" id="mobileSidebarToggle" aria-label="Open menu">
+          <span></span>
+          <span></span>
+        </button>
+
+        <div class="searchbar">
+          <input type="search" placeholder="Search bill no, customer, product...">
+        </div>
+
+        <div class="topbar__actions topbar__actions--row">
+          <button class="icon-btn bell-btn" aria-label="Notifications">
+            <span class="dot"></span>
+          </button>
+          <div class="profile-menu">
+            <button class="profile-menu__trigger" id="profileTrigger">
+              <div class="avatar">A</div>
+              <div>
+                <strong>Admin User</strong>
+                <span>Main Store</span>
+              </div>
+            </button>
+            <div class="profile-dropdown" id="profileDropdown">
+              <a href="invoice.html">Business Reports</a>
+              <a href="settings.html">Account Settings</a>
+              <a href="#">Logout</a>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main class="content">
+        <section class="hero-band hero-band--visual">
+          <div>
+            <p class="eyebrow">Business Overview</p>
+            <h1>SRI AYYAN Business Dashboard</h1>
+            <p class="muted">Track sales, inventory, furniture categories and daily billing with a more visual workspace anyone can follow.</p>
+          </div>
+          <div class="hero-illustration" aria-hidden="true">
+            <div class="hero-illustration__card sofa-shape"></div>
+            <div class="hero-illustration__card table-shape"></div>
+            <div class="hero-illustration__tag">Furniture Store</div>
+          </div>
+          <div class="hero-band__actions">
+            <a href="billing.html" class="btn btn-primary">Create Sale Bill</a>
+            <button class="btn btn-secondary">Record Payment</button>
+          </div>
+        </section>
+
+        <section class="visual-category-grid">
+          <article class="furniture-card">
+            <div class="furniture-card__art sofa-art"></div>
+            <strong>Sofas</strong>
+            <span>42 models in stock</span>
+          </article>
+          <article class="furniture-card">
+            <div class="furniture-card__art table-art"></div>
+            <strong>Tables</strong>
+            <span>28 dining and office units</span>
+          </article>
+          <article class="furniture-card">
+            <div class="furniture-card__art storage-art"></div>
+            <strong>Storage</strong>
+            <span>17 wardrobes and cabinets</span>
+          </article>
+          <article class="furniture-card">
+            <div class="furniture-card__art bed-art"></div>
+            <strong>Beds</strong>
+            <span>11 premium bedroom sets</span>
+          </article>
+        </section>
+
+        <section class="quick-grid">
+          <article class="quick-card active-quick">
+            <div class="quick-card__head"><span class="mini-icon">SL</span><span>Today Sale</span></div>
+            <strong>Rs. 54,260</strong>
+            <small>16 invoices generated today</small>
+          </article>
+          <article class="quick-card">
+            <div class="quick-card__head"><span class="mini-icon">IN</span><span>Payment In</span></div>
+            <strong>Rs. 21,800</strong>
+            <small>7 collections received</small>
+          </article>
+          <article class="quick-card">
+            <div class="quick-card__head"><span class="mini-icon">OU</span><span>Payment Out</span></div>
+            <strong>Rs. 12,450</strong>
+            <small>Vendor and transport expenses</small>
+          </article>
+          <article class="quick-card warning-card">
+            <div class="quick-card__head"><span class="mini-icon">LS</span><span>Low Stock Items</span></div>
+            <strong>08</strong>
+            <small>Needs reorder this week</small>
+          </article>
+        </section>
+
+        <section class="dashboard-grid">
+          <article class="panel chart-panel">
+            <div class="panel__head">
+              <div>
+                <h2>Sales Summary</h2>
+                <p class="muted">Monthly billing and collection trend</p>
+              </div>
+              <div class="pill">FY 2025-26</div>
+            </div>
+            <div class="chart-card">
+              <canvas id="salesChart" height="280"></canvas>
+            </div>
+          </article>
+
+          <article class="panel ledger-panel">
+            <div class="panel__head">
+              <div>
+                <h2>Quick Actions</h2>
+                <p class="muted">Frequently used business tasks</p>
+              </div>
+            </div>
+            <div class="action-grid">
+              <a href="billing.html" class="action-tile">
+                <span class="action-tile__icon">BI</span>
+                <strong>Create Bill</strong>
+                <span>Make a new sale invoice</span>
+              </a>
+              <a href="products.html" class="action-tile">
+                <span class="action-tile__icon">PD</span>
+                <strong>Add Product</strong>
+                <span>Update stock catalog</span>
+              </a>
+              <a href="customers.html" class="action-tile">
+                <span class="action-tile__icon">CU</span>
+                <strong>Add Party</strong>
+                <span>Save customer details</span>
+              </a>
+              <a href="invoice.html" class="action-tile">
+                <span class="action-tile__icon">PR</span>
+                <strong>Print Invoice</strong>
+                <span>Preview bill layout</span>
+              </a>
+            </div>
+            <div class="due-box">
+              <div>
+                <span class="stat-card__label">Outstanding Receivables</span>
+                <strong>Rs. 72,400</strong>
+              </div>
+              <button class="btn btn-secondary">View Dues</button>
+            </div>
+          </article>
+        </section>
+
+        <section class="stats-grid stats-grid--compact">
+          <article class="stat-card">
+            <span class="stat-card__label">Total Sales</span>
+            <strong>Rs. 8,42,500</strong>
+            <span class="trend trend-up">+12.4% this month</span>
+          </article>
+          <article class="stat-card">
+            <span class="stat-card__label">Total Products</span>
+            <strong>248</strong>
+            <span class="trend">18 newly added</span>
+          </article>
+          <article class="stat-card">
+            <span class="stat-card__label">Customers Count</span>
+            <strong>1,284</strong>
+            <span class="trend">86 active this week</span>
+          </article>
+          <article class="stat-card accent-card">
+            <span class="stat-card__label">Today Revenue</span>
+            <strong>Rs. 54,260</strong>
+            <span class="trend">Average bill Rs. 3,391</span>
+          </article>
+        </section>
+
+        <section class="panel">
+          <div class="panel__head">
+            <div>
+              <h2>Recent Transactions</h2>
+              <p class="muted">Latest billing activity from the store</p>
+            </div>
+            <button class="btn btn-secondary">View All</button>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Invoice No</th>
+                  <th>Customer</th>
+                  <th>Items</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>#INV-3021</td>
+                  <td>Rohit Sharma</td>
+                  <td>3</td>
+                  <td>Rs. 28,400</td>
+                  <td><span class="badge badge-success">Paid</span></td>
+                </tr>
+                <tr>
+                  <td>#INV-3018</td>
+                  <td>Neha Patel</td>
+                  <td>2</td>
+                  <td>Rs. 16,750</td>
+                  <td><span class="badge badge-warning">Pending</span></td>
+                </tr>
+                <tr>
+                  <td>#INV-3015</td>
+                  <td>Arjun Mehta</td>
+                  <td>5</td>
+                  <td>Rs. 41,900</td>
+                  <td><span class="badge badge-success">Paid</span></td>
+                </tr>
+                <tr>
+                  <td>#INV-3012</td>
+                  <td>Simran Kaur</td>
+                  <td>1</td>
+                  <td>Rs. 9,600</td>
+                  <td><span class="badge badge-info">Processing</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+  <script src="js/script.js"></script>
+</body>
+</html>
+

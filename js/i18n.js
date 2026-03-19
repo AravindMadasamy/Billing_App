@@ -1,0 +1,147 @@
+const translations = {
+  en: {
+    brand_subtitle: "Furniture",
+    nav_collections: "Collections",
+    nav_about: "About Us",
+    nav_contact: "Contact",
+    nav_admin: "Admin Dashboard",
+    hero_title: "Elevate Your Space with <span>Timeless Elegance</span>",
+    hero_subtitle: "Discover our exclusive collection of premium furniture designed to bring luxury, comfort, and unmatched style to your everyday living.",
+    hero_btn_explore: "Explore Collection",
+    hero_btn_story: "Our Story",
+    coll_title: "Curated Collections",
+    coll_subtitle: "Crafted with precision, designed for modern lifestyles.",
+    cat1_title: "Plush Seating",
+    cat1_desc: "Experience ultimate comfort with our designer sofas and sectionals.",
+    cat1_link: "View Gallery &rarr;",
+    cat2_title: "Dining & Tables",
+    cat2_desc: "Gather around masterpieces crafted from rich woods and tempered glass.",
+    cat2_link: "View Gallery &rarr;",
+    cat3_title: "Restful Bedrooms",
+    cat3_desc: "Transform your night's sleep with opulent bedframes and premium bedding.",
+    cat3_link: "View Gallery &rarr;",
+    feat1_title: "Artisan Craftsmanship",
+    feat1_desc: "Every piece is meticulously constructed by master craftsmen using sustainably sourced, premium materials.",
+    feat2_title: "Bespoke Design",
+    feat2_desc: "Our exclusive catalog bridges the gap between contemporary aesthetics and timeless functionality.",
+    feat3_title: "White-Glove Delivery",
+    feat3_desc: "Enjoy seamless delivery and professional assembly right in your home for an effortless experience.",
+    cta_title: "Ready to transform your home?",
+    cta_btn: "Schedule a Consultation",
+    footer_desc: "Bringing luxury and comfort to modern homes across the country. Your destination for premium interior design.",
+    footer_explore: "Explore",
+    footer_all_coll: "All Collections",
+    footer_new: "New Arrivals",
+    footer_story: "Our Story",
+    footer_support: "Support",
+    footer_care: "Care Guide",
+    footer_shipping: "Shipping & Returns",
+    footer_warranty: "Warranty",
+    footer_contact: "Contact",
+    footer_rights: "&copy; 2026 Sri Ayyan Furniture. All rights reserved.",
+    footer_login: "Internal System Login"
+  },
+  ta: {
+    brand_subtitle: "மரச்சாமான்கள்",
+    nav_collections: "தொகுப்புகள்",
+    nav_about: "எங்களை பற்றி",
+    nav_contact: "தொடர்பு",
+    nav_admin: "நிர்வாகி பதிவு",
+    hero_title: "உங்கள் இல்லத்தை <span>காலமில்லா அழகுடன்</span> உயர்த்துங்கள்",
+    hero_subtitle: "ஆடம்பரம், வசதி மற்றும் ஒப்பற்ற பாணியை உங்கள் அன்றாட வாழ்க்கைக்கு கொண்டு வரும் வகையில் வடிவமைக்கப்பட்ட பிரீமியம் தளபாடங்களின் எங்கள் பிரத்யேக தொகுப்பைக் கண்டறியவும்.",
+    hero_btn_explore: "தொகுப்பை ஆராயுங்கள்",
+    hero_btn_story: "எங்கள் கதை",
+    coll_title: "சிறப்பு தொகுப்புகள்",
+    coll_subtitle: "துல்லியமாக வடிவமைக்கப்பட்டு, நவீன வாழ்க்கை முறைக்காக உருவானவை.",
+    cat1_title: "சொகுசு இருக்கைகள்",
+    cat1_desc: "எங்கள் டிசைனர் சோபாக்களுடன் இறுதி வசதியை அனுபவிக்கவும்.",
+    cat1_link: "பட தொகுப்பைக் காண்க &rarr;",
+    cat2_title: "உணவு மேசைகள்",
+    cat2_desc: "வளமான மரங்கள் மற்றும் கண்ணாடியால் செய்யப்பட்ட தலைசிறந்த படைப்புகளைச் சுற்றி ஒன்று கூடுங்கள்.",
+    cat2_link: "பட தொகுப்பைக் காண்க &rarr;",
+    cat3_title: "அமைதியான படுக்கையறைகள்",
+    cat3_desc: "உங்கள் இரவு தூக்கத்தை ஆடம்பரமான படுக்கைகள் மூலம் மாற்றவும்.",
+    cat3_link: "பட தொகுப்பைக் காண்க &rarr;",
+    feat1_title: "கைவினைத் திறன்",
+    feat1_desc: "ஒவ்வொரு பகுதியும் நிலைத்தன்மை கொண்ட பிரீமியம் பொருட்களைப் பயன்படுத்தி கைவினைஞர்களால் கவனமாக உருவாக்கப்படுகிறது.",
+    feat2_title: "பிரத்தியேக வடிவமைப்பு",
+    feat2_desc: "நவீன அழகியலுக்கும் காலமில்லா செயல்பாட்டிற்கும் இடையிலான இடைவெளியை எங்கள் அட்டவணை குறைக்கிறது.",
+    feat3_title: "சிறந்த விநியோகம்",
+    feat3_desc: "தொந்தரவு இல்லாத விநியோகம் மற்றும் உங்கள் வீட்டிலேயே தொழில்முறை அசெம்பிளியை அனுபவிக்கவும்.",
+    cta_title: "உங்கள் இல்லத்தை மாற்ற தயாரா?",
+    cta_btn: "ஒரு ஆலோசனைக்கு பதிவு செய்க",
+    footer_desc: "நாடு முழுவதுமுள்ள நவீன வீடுகளுக்கு ஆடம்பரத்தையும் வசதியையும் கொண்டு வருகிறோம். பிரீமியம் உள் அலங்காரத்திற்கான உங்கள் இலக்கு.",
+    footer_explore: "ஆராயுங்கள்",
+    footer_all_coll: "அனைத்து தொகுப்புகளும்",
+    footer_new: "புதிய வரவுகள்",
+    footer_story: "எங்கள் கதை",
+    footer_support: "ஆதரவு",
+    footer_care: "பராமரிப்பு வழிகாட்டி",
+    footer_shipping: "விநியோகம்",
+    footer_warranty: "உத்தரவாதம்",
+    footer_contact: "தொடர்பு கொள்ள",
+    footer_rights: "&copy; 2026 ஸ்ரீ அய்யன் பர்னிச்சர். அனைத்து உரிமைகளும் பாதுகாக்கப்பட்டவை.",
+    footer_login: "உள்ளக அமைப்பு உள்நுழைவு"
+  },
+  hi: {
+    brand_subtitle: "फर्नीचर",
+    nav_collections: "संग्रह",
+    nav_about: "हमारे बारे में",
+    nav_contact: "संपर्क करें",
+    nav_admin: "एडमिन डैशबोर्ड",
+    hero_title: "शाश्वत लालित्य के साथ <span>अपने स्थान को संवारें</span>",
+    hero_subtitle: "आपके दैनिक जीवन में लक्जरी, आराम और बेजोड़ शैली लाने के लिए डिज़ाइन किए गए प्रीमियम फर्नीचर के हमारे विशेष संग्रह की खोज करें।",
+    hero_btn_explore: "संग्रह देखें",
+    hero_btn_story: "हमारी कहानी",
+    coll_title: "विशेष संग्रह",
+    coll_subtitle: "आधुनिक जीवन शैली के लिए सटीकता के साथ तैयार किया गया।",
+    cat1_title: "आलीशान बैठने की व्यवस्था",
+    cat1_desc: "हमारे डिज़ाइनर सोफे के साथ परम आराम का अनुभव करें।",
+    cat1_link: "गैलरी देखें &rarr;",
+    cat2_title: "डाइनिंग और टेबल",
+    cat2_desc: "समृद्ध लकड़ी और कांच से तैयार की गई उत्कृष्ट कृतियों के चारों ओर घूमें।",
+    cat2_link: "गैलरी देखें &rarr;",
+    cat3_title: "शांतिपूर्ण बेडरूम",
+    cat3_desc: "प्रीमियम बिस्तरों के साथ अपनी रात की नींद को बदलें।",
+    cat3_link: "गैलरी देखें &rarr;",
+    feat1_title: "कारीगरी",
+    feat1_desc: "प्रत्येक टुकड़े का निर्माण मास्टर कारीगरों द्वारा सावधानीपूर्वक किया जाता है।",
+    feat2_title: "विशेष डिजाइन",
+    feat2_desc: "हमारी विशेष सूची समकालीन सौंदर्य और कालातीत कार्यक्षमता के बीच की खाई को पाटती है।",
+    feat3_title: "शामिल डिलीवरी",
+    feat3_desc: "सहज डिलीवरी और अपने घर में पेशेवर असेंबली का आनंद लें।",
+    cta_title: "क्या आप अपना घर बदलने के लिए तैयार हैं?",
+    cta_btn: "परामर्श शेड्यूल करें",
+    footer_desc: "देश भर के आधुनिक घरों में विलासिता और आराम लाना। प्रीमियम इंटीरियर डिजाइन के लिए आपका गंतव्य।",
+    footer_explore: "खोजें",
+    footer_all_coll: "सभी संग्रह",
+    footer_new: "नई आवक",
+    footer_story: "हमारी कहानी",
+    footer_support: "सहायता",
+    footer_care: "देखभाल गाइड",
+    footer_shipping: "शिपिंग और रिटर्न",
+    footer_warranty: "वारंटी",
+    footer_contact: "संपर्क",
+    footer_rights: "&copy; 2026 श्री अय्यन फर्नीचर। सर्वाधिकार सुरक्षित।",
+    footer_login: "आंतरिक सिस्टम लॉगिन"
+  }
+};
+
+function changeLanguage() {
+  const lang = document.getElementById("language-selector").value;
+  const elements = document.querySelectorAll("[data-i18n]");
+  
+  elements.forEach(element => {
+    const key = element.getAttribute("data-i18n");
+    if (translations[lang] && translations[lang][key]) {
+      element.innerHTML = translations[lang][key];
+    }
+  });
+
+  document.documentElement.lang = lang;
+}
+
+// Set initial language based on selector
+document.addEventListener('DOMContentLoaded', () => {
+    changeLanguage();
+});

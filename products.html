@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SRI AYYAN Billing | Products</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="products">
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar__header">
+        <a class="brand" href="dashboard.html">
+          <span class="brand__mark">SA</span>
+          <div class="brand__text">
+            <strong>SRI AYYAN</strong>
+            <span>Furniture Billing</span>
+          </div>
+        </a>
+        <button class="icon-btn sidebar-toggle desktop-only" id="sidebarToggle" aria-label="Toggle sidebar">
+          <span></span>
+          <span></span>
+        </button>
+      </div>
+      <nav class="sidebar__nav">
+        <a href="dashboard.html" class="nav-link"><span class="nav-link__icon">DB</span><span>Dashboard</span></a>
+        <a href="products.html" class="nav-link active"><span class="nav-link__icon">PR</span><span>Products</span></a>
+        <a href="customers.html" class="nav-link"><span class="nav-link__icon">CU</span><span>Customers</span></a>
+        <a href="billing.html" class="nav-link"><span class="nav-link__icon">BL</span><span>Billing</span></a>
+        <a href="invoice.html" class="nav-link"><span class="nav-link__icon">RP</span><span>Reports</span></a>
+        <a href="settings.html" class="nav-link"><span class="nav-link__icon">ST</span><span>Settings</span></a>
+      </nav>
+      <div class="sidebar__footer">
+        <div class="theme-switch">
+          <span>Theme</span>
+          <button class="switch" id="themeToggle" aria-label="Toggle theme"></button>
+        </div>
+      </div>
+    </aside>
+
+    <div class="main-panel">
+      <header class="topbar">
+        <button class="icon-btn mobile-only" id="mobileSidebarToggle" aria-label="Open menu">
+          <span></span>
+          <span></span>
+        </button>
+        <div class="searchbar">
+          <input type="search" placeholder="Search products, category, stock...">
+        </div>
+        <div class="topbar__actions">
+          <button class="icon-btn bell-btn" aria-label="Notifications">
+            <span class="dot"></span>
+          </button>
+          <div class="profile-menu">
+            <button class="profile-menu__trigger" id="profileTrigger">
+              <div class="avatar">A</div>
+              <div>
+                <strong>Admin User</strong>
+                <span>Inventory Admin</span>
+              </div>
+            </button>
+            <div class="profile-dropdown" id="profileDropdown">
+              <a href="#">Profile</a>
+              <a href="settings.html">Store Settings</a>
+              <a href="#">Logout</a>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main class="content">
+        <section class="page-heading">
+          <div>
+            <p class="eyebrow">Inventory Control</p>
+            <h1>Products</h1>
+            <p class="muted">Manage stock, pricing, and categories for your furniture catalog.</p>
+          </div>
+          <button class="btn btn-primary" data-modal-target="productModal">Add Product</button>
+        </section>
+
+        <section class="visual-category-grid visual-category-grid--three">
+          <article class="furniture-card compact-card">
+            <div class="furniture-card__art sofa-art"></div>
+            <strong>Seating</strong>
+            <span>Sofas, chairs, recliners</span>
+          </article>
+          <article class="furniture-card compact-card">
+            <div class="furniture-card__art table-art"></div>
+            <strong>Tables</strong>
+            <span>Dining, coffee, office</span>
+          </article>
+          <article class="furniture-card compact-card">
+            <div class="furniture-card__art storage-art"></div>
+            <strong>Storage</strong>
+            <span>Wardrobes and cabinets</span>
+          </article>
+        </section>
+
+        <section class="panel">
+          <div class="toolbar products-toolbar">
+            <div class="toolbar__group products-toolbar__group">
+              <div class="searchbar searchbar--inline">
+                <input type="search" id="productSearch" placeholder="Search products...">
+              </div>
+              <select class="select-control" id="productFilter">
+                <option value="all">All Categories</option>
+                <option value="Seating">Seating</option>
+                <option value="Tables">Tables</option>
+                <option value="Storage">Storage</option>
+                <option value="Bedroom">Bedroom</option>
+              </select>
+            </div>
+            <div class="toolbar__actions products-toolbar__actions">
+              <button class="btn btn-secondary">Export</button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table id="productsTable">
+              <thead>
+                <tr>
+                  <th>Product Name</th>
+                  <th>Category</th>
+                  <th>Price</th>
+                  <th>Stock</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><div class="table-visual"><span class="table-visual__icon sofa-art mini-art"></span><div><strong>Royal Sofa Set</strong><small>3 seater premium sofa</small></div></div></td>
+                  <td data-category="Seating"><span class="category-pill">Seating</span></td>
+                  <td>Rs. 32,000</td>
+                  <td><div class="stock-indicator"><strong>14</strong><span class="stock-indicator__bar"><i style="width:70%"></i></span></div></td>
+                  <td><div class="table-actions"><button class="btn btn-icon" data-modal-target="productModal">Edit</button><button class="btn btn-danger btn-icon">Delete</button></div></td>
+                </tr>
+                <tr>
+                  <td><div class="table-visual"><span class="table-visual__icon table-art mini-art"></span><div><strong>Oak Dining Table</strong><small>6 seat wooden dining</small></div></div></td>
+                  <td data-category="Tables"><span class="category-pill">Tables</span></td>
+                  <td>Rs. 24,500</td>
+                  <td><div class="stock-indicator"><strong>9</strong><span class="stock-indicator__bar"><i style="width:45%"></i></span></div></td>
+                  <td><div class="table-actions"><button class="btn btn-icon" data-modal-target="productModal">Edit</button><button class="btn btn-danger btn-icon">Delete</button></div></td>
+                </tr>
+                <tr>
+                  <td><div class="table-visual"><span class="table-visual__icon storage-art mini-art"></span><div><strong>Classic Wardrobe</strong><small>2 door storage unit</small></div></div></td>
+                  <td data-category="Storage"><span class="category-pill">Storage</span></td>
+                  <td>Rs. 28,900</td>
+                  <td><div class="stock-indicator"><strong>6</strong><span class="stock-indicator__bar"><i style="width:30%"></i></span></div></td>
+                  <td><div class="table-actions"><button class="btn btn-icon" data-modal-target="productModal">Edit</button><button class="btn btn-danger btn-icon">Delete</button></div></td>
+                </tr>
+                <tr>
+                  <td><div class="table-visual"><span class="table-visual__icon bed-art mini-art"></span><div><strong>King Bed Frame</strong><small>Solid wood bedroom piece</small></div></div></td>
+                  <td data-category="Bedroom"><span class="category-pill">Bedroom</span></td>
+                  <td>Rs. 39,000</td>
+                  <td><div class="stock-indicator"><strong>4</strong><span class="stock-indicator__bar"><i style="width:20%"></i></span></div></td>
+                  <td><div class="table-actions"><button class="btn btn-icon" data-modal-target="productModal">Edit</button><button class="btn btn-danger btn-icon">Delete</button></div></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <div class="modal" id="productModal">
+    <div class="modal__dialog">
+      <div class="modal__header">
+        <div>
+          <h2>Add Product</h2>
+          <p class="muted">Update product details for inventory management.</p>
+        </div>
+        <button class="modal-close" data-modal-close>&times;</button>
+      </div>
+      <form class="modal__body form-grid">
+        <label class="field"><input type="text" placeholder=" " required><span>Product Name</span></label>
+        <label class="field"><input type="text" placeholder=" " required><span>Category</span></label>
+        <label class="field"><input type="number" placeholder=" " required><span>Price</span></label>
+        <label class="field"><input type="number" placeholder=" " required><span>Stock Quantity</span></label>
+        <div class="modal__actions full-span">
+          <button type="button" class="btn btn-secondary" data-modal-close>Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Product</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <script src="js/script.js"></script>
+</body>
+</html>
+
+
