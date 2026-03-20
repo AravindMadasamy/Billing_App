@@ -91,36 +91,53 @@
           <article class="panel">
             <div class="panel__head">
               <div>
-                <h2>Store Details</h2>
-                <p class="muted">Basic business information</p>
+                <h2>Store Identity</h2>
+                <p class="muted">Update your business branding</p>
               </div>
             </div>
-            <div class="modal__body">
-              <label class="field"><input type="text" placeholder=" " value="SRI AYYAN"><span>Shop Name</span></label>
-              <label class="field"><input type="text" placeholder=" " value="+91 90000 44556"><span>Phone Number</span></label>
-              <label class="field full-span"><textarea placeholder=" " rows="4">221 Artisan Avenue, Bengaluru, India</textarea><span>Business Address</span></label>
+            <div class="modal__body" id="storeIdentityForm">
+              <label class="field"><input type="text" id="setShopName" placeholder=" " value="SRI AYYAN"><span>Shop Name</span></label>
+              <label class="field"><input type="text" id="setShopTagline" placeholder=" " value="Furniture Billing"><span>Tagline / Slogan</span></label>
+              <label class="field"><input type="text" id="setPhone" placeholder=" " value="+91 90000 44556"><span>Phone Number</span></label>
+              <label class="field full-span"><textarea id="setAddress" placeholder=" " rows="3">221 Artisan Avenue, Bengaluru, India</textarea><span>Business Address</span></label>
             </div>
           </article>
 
           <article class="panel">
             <div class="panel__head">
               <div>
-                <h2>Billing Preferences</h2>
-                <p class="muted">Tax and invoice options</p>
+                <h2>Theme & Appearance</h2>
+                <p class="muted">Customize the look and feel</p>
               </div>
             </div>
-            <div class="stack">
-              <div class="selection-note">
-                <strong>Default GST</strong>
-                <span>18% applied on all retail bills.</span>
+            <div class="modal__body">
+              <div style="display:flex; align-items:center; gap:1rem; margin-bottom:1.5rem;">
+                <input type="color" id="setPrimaryColor" style="width:50px; height:50px; border:none; cursor:pointer;" value="#1f6feb">
+                <div>
+                  <strong>Primary Accent Color</strong><br>
+                  <small class="muted">Sets the main brand color across the app</small>
+                </div>
               </div>
               <div class="selection-note">
+                <strong>Dark Mode</strong>
+                <span>Use the sidebar toggle to switch themes.</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="panel">
+            <div class="panel__head">
+              <div>
+                <h2>Billing & Taxes</h2>
+                <p class="muted">Configure default tax and receipts</p>
+              </div>
+            </div>
+            <div class="modal__body">
+              <label class="field"><input type="number" id="setGstRate" placeholder=" " value="18"><span>Default GST Rate (%)</span></label>
+              <label class="field full-span"><input type="text" id="setReceiptFooter" placeholder=" " value="Thank you for your business!"><span>Receipt Footer Message</span></label>
+              <div class="selection-note" style="margin-top:1rem;">
                 <strong>Invoice Format</strong>
-                <span>A4 printable invoice layout is enabled.</span>
-              </div>
-              <div class="selection-note">
-                <strong>Theme Preference</strong>
-                <span>Use the sidebar toggle to switch between light and dark themes.</span>
+                <span>80mm Thermal & A4 Standard are both supported.</span>
               </div>
             </div>
           </article>

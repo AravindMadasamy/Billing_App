@@ -9,6 +9,65 @@ const profileTrigger = document.getElementById("profileTrigger");
 const profileDropdown = document.getElementById("profileDropdown");
 let languageSwitch = null;
 
+// ── App Settings System ──
+const defaultSettings = {
+  shopName: "SRI AYYAN",
+  shopTagline: "Furniture Billing",
+  phone: "+91 90000 44556",
+  address: "221 Artisan Avenue, Bengaluru, India",
+  gstRate: 18,
+  primaryColor: "#1f6feb",
+  receiptFooter: "Thank you for your business!"
+};
+
+function getSettings() {
+  const saved = localStorage.getItem("pos_settings");
+  return saved ? { ...defaultSettings, ...JSON.parse(saved) } : defaultSettings;
+}
+
+function applySettings() {
+  const s = getSettings();
+  
+  // 1. Update Brand Text (Sidebar & Header)
+  document.querySelectorAll(".brand__text strong").forEach(el => el.textContent = s.shopName);
+  document.querySelectorAll(".brand__text span").forEach(el => el.textContent = s.shopTagline);
+  document.querySelectorAll(".brand__mark").forEach(el => {
+    el.textContent = s.shopName.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
+  });
+
+  // 2. Apply Custom Theme Color
+  document.documentElement.style.setProperty("--primary", s.primaryColor);
+  
+  // Update theme color meta for mobile browser chrome
+  let metaTheme = document.querySelector('meta[name="theme-color"]');
+  if (!metaTheme) {
+    metaTheme = document.createElement('meta');
+    metaTheme.name = "theme-color";
+    document.head.appendChild(metaTheme);
+  }
+  metaTheme.content = s.primaryColor;
+
+  // 3. Update Page Titles if they contain the brand name
+  if (document.title.includes("|")) {
+    const parts = document.title.split("|");
+    document.title = `${s.shopName} | ${parts[1].trim()}`;
+  }
+}
+
+function saveSettings(newSettings) {
+  const current = getSettings();
+  const updated = { ...current, ...newSettings };
+  localStorage.setItem("pos_settings", JSON.stringify(updated));
+  applySettings();
+}
+
+// Run applySettings immediately
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", applySettings);
+} else {
+  applySettings();
+}
+
 const translations = {
   en: {
     nav_dashboard: "Dashboard",
@@ -632,6 +691,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initBillingPOS();
   initInvoicePrint();
   initChart();
+  initSettingsPage();
 });
 
 
@@ -742,14 +802,20 @@ function initBillingPOS() {
   }
 
   function totals() {
+    const s = getSettings();
     let subtotal = 0;
     items.forEach((i) => subtotal += i.price * i.qty);
-    const gst = subtotal * 0.18;
-    const discount = Math.max(0, Math.min(Number(discountInput.value || 0), subtotal + gst));
-    const grand = subtotal + gst - discount;
+    const gstTotal = subtotal * (s.gstRate / 100);
+    const discount = Math.max(0, Math.min(Number(discountInput.value || 0), subtotal + gstTotal));
+    const grand = subtotal + gstTotal - discount;
 
     subtotalEl.textContent = money(subtotal);
-    gstEl.textContent = money(gst);
+    gstEl.textContent = money(gstTotal);
+    const gstLabel = document.querySelector(".tot-row span:nth-child(1)"); // Subtotal row label check
+    // Try to find the GST label to update the text (e.g. GST 18% -> GST 12%)
+    const gstLabelEl = Array.from(document.querySelectorAll('.tot-row span')).find(el => el.textContent.includes('GST'));
+    if (gstLabelEl) gstLabelEl.textContent = `GST (${s.gstRate}%)`;
+
     grandEl.textContent = money(grand);
     if (Number(discountInput.value) !== discount) discountInput.value = discount;
   }
@@ -871,17 +937,22 @@ function initBillingPOS() {
         return;
       }
       
+      const s = getSettings();
       const sub = Array.from(items.values()).reduce((sum, item) => sum + item.price * item.qty, 0);
       const discount = Number(discountInput?.value || 0);
-      const total = sub + (sub * 0.18) - discount;
+      const gstAmt = sub * (s.gstRate / 100);
+      const total = sub + gstAmt - discount;
       const customerInput = document.getElementById("posCustomerInput");
 
       // ── Generate Thermal Receipt for Printing ──
       let receiptHTML = `
         <div id="printReceipt">
           <div class="receipt-header">
-            <h2>SRI AYYAN FURNITURE</h2>
-            <div>Tax Invoice</div>
+            <h2>${s.shopName.toUpperCase()}</h2>
+            <div>${s.shopTagline}</div>
+            <div style="font-size:10px; margin-top:4px;">${s.address}</div>
+            <div style="font-size:10px;">Ph: ${s.phone}</div>
+            <div style="margin-top:8px; border-top:1px dashed #000; padding-top:4px;">Tax Invoice</div>
             <div>Date: ${new Date().toLocaleString()}</div>
             ${customerInput?.value ? `<div>Customer: ${customerInput.value}</div>` : ''}
           </div>
@@ -899,10 +970,10 @@ function initBillingPOS() {
           </table>
           <div class="receipt-totals">
             <div>Subtotal: ${money(sub)}</div>
-            <div>GST (18%): ${money(sub * 0.18)}</div>
+            <div>GST (${s.gstRate}%): ${money(gstAmt)}</div>
             ${discount > 0 ? `<div>Discount: -${money(discount)}</div>` : ''}
             <div class="receipt-grand">Total: ${money(total)}</div>
-            <div class="receipt-footer">Thank you for your business!</div>
+            <div class="receipt-footer">${s.receiptFooter}</div>
           </div>
         </div>
       `;
@@ -936,9 +1007,10 @@ function initBillingPOS() {
     // 2. Wrap up
     closeReceiptPreview();
     
+    const s = getSettings();
     const sub = Array.from(items.values()).reduce((sum, item) => sum + item.price * item.qty, 0);
     const discount = Number(discountInput?.value || 0);
-    const total = sub + (sub * 0.18) - discount;
+    const total = sub + (sub * (s.gstRate / 100)) - discount;
     
     showToast("Bill Generated: " + money(total), "success");
     
@@ -1223,6 +1295,63 @@ function initBillingPOS() {
   renderBill();
   selectRow(firstBarcode());
   renderHistory();
+}
+
+function initSettingsPage() {
+  const page = document.body.dataset.page;
+  if (page !== "settings") return;
+
+  const s = getSettings();
+
+  // 1. Populate current values
+  const fields = {
+    setShopName: s.shopName,
+    setShopTagline: s.shopTagline,
+    setPhone: s.phone,
+    setAddress: s.address,
+    setPrimaryColor: s.primaryColor,
+    setGstRate: s.gstRate,
+    setReceiptFooter: s.receiptFooter
+  };
+
+  Object.entries(fields).forEach(([id, val]) => {
+    const el = document.getElementById(id);
+    if (el) el.value = val;
+  });
+
+  // 2. Handle Save
+  const saveBtn = document.querySelector('.hero-band__actions .btn-primary');
+  if (saveBtn) {
+    saveBtn.addEventListener('click', () => {
+      const newSettings = {
+        shopName: document.getElementById('setShopName').value,
+        shopTagline: document.getElementById('setShopTagline').value,
+        phone: document.getElementById('setPhone').value,
+        address: document.getElementById('setAddress').value,
+        primaryColor: document.getElementById('setPrimaryColor').value,
+        gstRate: Number(document.getElementById('setGstRate').value),
+        receiptFooter: document.getElementById('setReceiptFooter').value
+      };
+
+      saveSettings(newSettings);
+      
+      // Visual feedback
+      saveBtn.disabled = true;
+      saveBtn.textContent = "Saved!";
+      setTimeout(() => {
+        saveBtn.disabled = false;
+        saveBtn.textContent = "Save Changes";
+      }, 2000);
+      
+      // Use showToast if on a page with toast (settings has no pos-toast usually, but let's check or add)
+      const toast = document.getElementById("posToast");
+      if (toast) {
+        // ... showToast would work here if we had one
+      } else {
+        alert("Settings Saved Successfully!");
+      }
+    });
+  }
 }
 
 
