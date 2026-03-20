@@ -431,16 +431,16 @@
       box-shadow: 0 4px 14px rgba(31,111,235,0.3);
     }
 
-    /* ── Generate Bill button ── */
+    /* ── Checkout buttons ── */
     .cart-cta {
       flex-shrink: 0;
       display: grid;
-      grid-template-columns: 1fr auto;
+      grid-template-columns: 1fr 1fr auto;
       gap: 0;
     }
     .cart-cta-main {
-      padding: 1.1rem;
-      font-size: 1rem;
+      padding: 1.1rem 0.5rem;
+      font-size: 0.95rem;
       font-weight: 700;
       letter-spacing: 0.02em;
       background: var(--success);
@@ -448,8 +448,22 @@
       border: none;
       cursor: pointer;
       transition: background 0.18s;
+      border-right: 1px solid rgba(255,255,255,0.1);
     }
     .cart-cta-main:hover { background: #0d845a; }
+    
+    .cart-cta-sec {
+      padding: 1.1rem 0.5rem;
+      font-size: 0.95rem;
+      font-weight: 700;
+      background: #3b82f6;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      transition: background 0.18s;
+      border-right: 1px solid rgba(255,255,255,0.1);
+    }
+    .cart-cta-sec:hover { background: #2563eb; }
     .cart-cta-clear {
       padding: 1.1rem 1.3rem;
       font-size: 0.85rem;
@@ -847,7 +861,8 @@
 
         <!-- CTA -->
         <div class="cart-cta">
-          <button class="cart-cta-main" id="posGenerateBillBtn" type="button">✅&nbsp; Charge &amp; Generate Bill</button>
+          <button class="cart-cta-sec" id="posJustChargeBtn" type="button">⚡ Just Charge</button>
+          <button class="cart-cta-main" id="posGenerateBillBtn" type="button">🧾 Generate Bill</button>
           <button class="cart-cta-clear" id="posClearBillBtn" type="button">🗑 Clear</button>
         </div>
 

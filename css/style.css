@@ -1226,18 +1226,16 @@ tbody tr:hover {
   box-shadow: -22px 14px 0 -3px rgba(20, 154, 98, 0.22), 22px 14px 0 -3px rgba(20, 154, 98, 0.22);
 }
 
-.visual-category-grid,
-.product-picks {
+.visual-category-grid {
   display: grid;
   gap: 18px;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
 }
 
-.visual-category-grid {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-}
-
-.visual-category-grid--three {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+.furniture-card.active-card {
+  border-color: var(--primary);
+  background: var(--accent);
+  box-shadow: 0 8px 30px rgba(31,111,235,0.15);
 }
 
 .product-picks {
@@ -1343,6 +1341,37 @@ tbody tr:hover {
   border-radius: 8px;
   background: rgba(207, 91, 80, 0.18);
   box-shadow: 22px 0 0 rgba(207, 91, 80, 0.18);
+}
+
+.all-art::before {
+  content: "ALL";
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-weight: 900;
+  font-size: 1.1rem;
+  letter-spacing: 0.1em;
+  color: var(--primary);
+  background: var(--accent);
+  border-radius: inherit;
+}
+
+.default-art::before {
+  inset: 12px;
+  border-radius: 12px;
+  background: rgba(140, 140, 140, 0.15);
+  border: 2px dashed rgba(140, 140, 140, 0.3);
+}
+
+.default-art::after {
+  content: "";
+  position: absolute;
+  inset: 12px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: rgba(140, 140, 140, 0.1);
 }
 
 .pick-card {

@@ -81,25 +81,15 @@
           <button class="btn btn-primary" data-modal-target="productModal">Add Product</button>
         </section>
 
-        <section class="visual-category-grid visual-category-grid--three">
-          <article class="furniture-card compact-card">
-            <div class="furniture-card__art sofa-art"></div>
-            <strong>Seating</strong>
-            <span>Sofas, chairs, recliners</span>
-          </article>
-          <article class="furniture-card compact-card">
-            <div class="furniture-card__art table-art"></div>
-            <strong>Tables</strong>
-            <span>Dining, coffee, office</span>
-          </article>
-          <article class="furniture-card compact-card">
-            <div class="furniture-card__art storage-art"></div>
-            <strong>Storage</strong>
-            <span>Wardrobes and cabinets</span>
-          </article>
+        <section class="visual-category-grid" id="productCategoryGrid">
+          <!-- Categories injected by JS -->
         </section>
 
         <section class="panel">
+          <div class="panel__head">
+             <h2>Product Inventory</h2>
+             <p class="muted">Manage and track all furniture items across categories.</p>
+          </div>
           <div class="toolbar products-toolbar">
             <div class="toolbar__group products-toolbar__group">
               <div class="searchbar searchbar--inline">
@@ -107,10 +97,6 @@
               </div>
               <select class="select-control" id="productFilter">
                 <option value="all">All Categories</option>
-                <option value="Seating">Seating</option>
-                <option value="Tables">Tables</option>
-                <option value="Storage">Storage</option>
-                <option value="Bedroom">Bedroom</option>
               </select>
             </div>
             <div class="toolbar__actions products-toolbar__actions">

@@ -81,6 +81,15 @@ function applySettings() {
   if (footerEmail && (footerEmail.textContent.includes("hello@") || footerEmail.textContent.includes("example.com"))) {
     footerEmail.textContent = `contact@${s.shopName.toLowerCase().replace(/\s+/g, '')}.com`;
   }
+
+  // 5. Update Global Metrics (Sidebar Balance)
+  const invoices = getInvoices();
+  const totalSales = invoices.reduce((sum, inv) => sum + inv.total, 0);
+  const money = (v) => `Rs. ${Number(v).toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
+  
+  document.querySelectorAll(".sidebar-metric strong").forEach(el => {
+    el.textContent = money(totalSales);
+  });
 }
 
 function saveSettings(newSettings) {
@@ -144,6 +153,27 @@ function saveCategories(list) {
   localStorage.setItem("pos_categories", JSON.stringify(list));
 }
 
+function getCategoryArt(catName, catTag) {
+  const name = (catName || "").toLowerCase();
+  const tag = (catTag || "").toLowerCase();
+  const known = ["sofa", "table", "storage", "bed"];
+  
+  // 1. Check if tag matches known art
+  if (known.includes(tag)) return tag + "-art";
+  if (tag === "se") return "sofa-art";
+  if (tag === "tb") return "table-art";
+  if (tag === "st") return "storage-art";
+  if (tag === "bd") return "bed-art";
+
+  // 2. Keyword matching in name
+  if (name.includes("sofa") || name.includes("seating") || name.includes("chair")) return "sofa-art";
+  if (name.includes("table") || name.includes("desk")) return "table-art";
+  if (name.includes("storage") || name.includes("wardrobe") || name.includes("cabinet")) return "storage-art";
+  if (name.includes("bed") || name.includes("bedroom") || name.includes("mattress")) return "bed-art";
+  
+  return "default-art";
+}
+
 // ── Invoice / Sales Persistence System ──
 function getInvoices() {
   const saved = localStorage.getItem("pos_invoices");
@@ -161,11 +191,95 @@ window.addEventListener("storage", (e) => {
   }
 });
 
-// Run applySettings immediately
+// Run app initialization on load
 if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", applySettings);
+  document.addEventListener("DOMContentLoaded", initApp);
 } else {
+  initApp();
+}
+
+/** ── App Logic Router ── **/
+function initApp() {
   applySettings();
+  const page = document.body.dataset.page;
+  
+  if (page === "dashboard") initDashboardPage();
+  else if (page === "products") initProductsPage();
+  else if (page === "customers") initCustomersPage();
+  else if (page === "billing") initBillingPage();
+  else if (page === "invoice") initReportsPage();
+  else if (page === "categories") initCategoriesPage();
+  else if (page === "settings") initSettingsPage();
+}
+
+/** ── Global Utilities ── **/
+function showToast(message, type = "success") {
+  const toast = document.getElementById("posToast");
+  const toastMsg = document.getElementById("posToastMsg");
+  if (!toast || !toastMsg) return;
+  
+  toastMsg.textContent = message;
+  toast.className = `pos-toast ${type} open`;
+  
+  setTimeout(() => {
+    toast.classList.remove("open");
+  }, 3000);
+}
+
+function beep() {
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = "sine";
+  osc.frequency.setValueAtTime(880, ctx.currentTime);
+  gain.gain.setValueAtTime(0.1, ctx.currentTime);
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.start();
+  osc.stop(ctx.currentTime + 0.1);
+}
+
+function flashSuccess() {
+  const overlay = document.createElement("div");
+  overlay.style.cssText = "position:fixed; inset:0; background:rgba(20,154,98,0.1); pointer-events:none; z-index:9999; animation: flash 0.3s ease-out forwards;";
+  document.body.appendChild(overlay);
+  setTimeout(() => overlay.remove(), 300);
+}
+
+function initChart() {
+  const ctx = document.getElementById('salesChart');
+  if (!ctx) return;
+
+  const invoices = getInvoices();
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const salesData = new Array(12).fill(0);
+  
+  invoices.forEach(inv => {
+    const d = new Date(inv.date);
+    salesData[d.getMonth()] += inv.total;
+  });
+
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: months,
+      datasets: [{
+        label: 'Sales (Rs.)',
+        data: salesData,
+        backgroundColor: '#1f6feb',
+        borderRadius: 6
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, grid: { color: '#f0f0f0' } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
 }
 
 const translations = {
@@ -706,12 +820,26 @@ function initInvoicePrint() {
   document.getElementById("printInvoice")?.addEventListener("click", () => window.print());
 }
 
-function initChart() {
+function initChart(dynamicValues = null) {
   const canvas = document.getElementById("salesChart");
   if (!canvas) return;
 
   const ctx = canvas.getContext("2d");
-  const values = [18, 28, 22, 34, 38, 31, 45, 41, 49, 52, 47, 58];
+  
+  // Dynamic Data Logic
+  let values = dynamicValues;
+  if (!values) {
+    const invoices = getInvoices();
+    const currentYear = new Date().getFullYear();
+    values = new Array(12).fill(0);
+    invoices.forEach(inv => {
+      const date = new Date(inv.date);
+      if (date.getFullYear() === currentYear) {
+        values[date.getMonth()] += inv.total;
+      }
+    });
+  }
+
   const labels = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   const dpr = window.devicePixelRatio || 1;
   canvas.width = canvas.offsetWidth * dpr;
@@ -720,7 +848,7 @@ function initChart() {
   ctx.clearRect(0, 0, canvas.offsetWidth, canvas.offsetHeight);
 
   const padding = 48;
-  const maxValue = Math.max(...values) + 10;
+  const maxVal = Math.max(...values, 1000); // Ensure at least some scale
   const rootStyles = getComputedStyle(document.body);
   const textColor = rootStyles.getPropertyValue("--text-soft").trim();
   const lineColor = rootStyles.getPropertyValue("--primary").trim();
@@ -743,7 +871,7 @@ function initChart() {
 
   const points = values.map((value, index) => {
     const x = padding + (index * ((canvas.offsetWidth - 96) / (values.length - 1)));
-    const y = canvas.offsetHeight - padding - ((value / maxValue) * (canvas.offsetHeight - 120));
+    const y = canvas.offsetHeight - padding - ((value / maxVal) * (canvas.offsetHeight - 120));
     return { x, y };
   });
 
@@ -1015,6 +1143,57 @@ function initBillingPOS() {
     totals();
   }
 
+  function finalizeSale() {
+    if (items.size === 0) {
+      showToast("Cart is empty!", "error");
+      return false;
+    }
+
+    const s = getSettings();
+    const sub = Array.from(items.values()).reduce((sum, item) => sum + item.price * item.qty, 0);
+    const discount = Number(discountInput?.value || 0);
+    const gstAmt = sub * (s.gstRate / 100);
+    const total = sub + gstAmt - discount;
+    const customerName = document.getElementById("posCustomerInput")?.value || "Walking Customer";
+
+    // 1. Save Invoice
+    const invoices = getInvoices();
+    const newInvoice = {
+      id: "INV-" + Date.now().toString().slice(-6),
+      date: new Date().toISOString(),
+      customer: customerName,
+      itemsCount: Array.from(items.values()).reduce((sum, item) => sum + item.qty, 0),
+      subtotal: sub,
+      gst: gstAmt,
+      discount: discount,
+      total: total,
+      status: "Paid"
+    };
+    invoices.unshift(newInvoice);
+    saveInvoices(invoices);
+
+    // 2. Update stock levels
+    const products = getProducts();
+    items.forEach((item, barcode) => {
+      const p = products.find(prod => prod.barcode === barcode);
+      if (p) {
+        p.stock = Math.max(0, p.stock - item.qty);
+      }
+    });
+    saveProducts(products);
+
+    // 3. Clear cart
+    items.clear();
+    selectedBarcode = "";
+    if (discountInput) discountInput.value = 0;
+    const customerInput = document.getElementById("posCustomerInput");
+    if (customerInput) customerInput.value = "";
+    renderBill();
+
+    showToast(`Sale #${newInvoice.id} completed!`, "success");
+    return true;
+  }
+
   const clearAllBtn = document.getElementById("posClearBillBtn");
   if (clearAllBtn) {
     clearAllBtn.addEventListener("click", () => {
@@ -1085,6 +1264,23 @@ function initBillingPOS() {
     });
   }
 
+  const justChargeBtn = document.getElementById("posJustChargeBtn");
+  if (justChargeBtn) {
+    justChargeBtn.addEventListener("click", () => {
+      const sub = Array.from(items.values()).reduce((sum, item) => sum + item.price * item.qty, 0);
+      const s = getSettings();
+      const gstAmt = sub * (s.gstRate / 100);
+      const discount = Number(discountInput?.value || 0);
+      const total = sub + gstAmt - discount;
+      
+      if (items.size > 0 && confirm(`Complete sale for ${money(total)}?`)) {
+        finalizeSale();
+      } else if (items.size === 0) {
+        showToast("Cart is empty!", "error");
+      }
+    });
+  }
+
   // ── Receipt Modal Actions ──
   const receiptModal = document.getElementById("posReceiptModal");
   function closeReceiptPreview() {
@@ -1101,50 +1297,10 @@ function initBillingPOS() {
     // 1. Print natively
     window.print();
     
-    // 2. Save Invoice
-    const s = getSettings();
-    const sub = Array.from(items.values()).reduce((sum, item) => sum + item.price * item.qty, 0);
-    const discount = Number(discountInput?.value || 0);
-    const gstAmt = sub * (s.gstRate / 100);
-    const total = sub + gstAmt - discount;
-
-    const invoices = getInvoices();
-    const newInvoice = {
-      id: "INV-" + Date.now().toString().slice(-6),
-      date: new Date().toISOString(),
-      customer: document.getElementById("posCustomerInput")?.value || "Walking Customer",
-      itemsCount: Array.from(items.values()).reduce((sum, item) => sum + item.qty, 0),
-      subtotal: sub,
-      gst: gstAmt,
-      discount: discount,
-      total: total,
-      status: "Paid"
-    };
-    invoices.unshift(newInvoice);
-    saveInvoices(invoices);
-
-    // 3. Update stock levels
-    const products = getProducts();
-    items.forEach((item, barcode) => {
-      const p = products.find(prod => prod.barcode === barcode);
-      if (p) {
-        p.stock = Math.max(0, p.stock - item.qty);
-      }
-    });
-    saveProducts(products);
-    
-    // 4. Wrap up
-    closeReceiptPreview();
-    showToast("Bill Generated: " + money(total), "success");
-    
-    items.clear();
-    selectedBarcode = "";
-    if (discountInput) discountInput.value = 0;
-    const customerInput = document.getElementById("posCustomerInput");
-    if (customerInput) customerInput.value = "";
-    
-    renderBill();
-    selectRow("");
+    // 2. Finalize Sale
+    if (finalizeSale()) {
+      closeReceiptPreview();
+    }
   });
 
   function pushHistory(product) {
@@ -1495,27 +1651,44 @@ function initProductsPage() {
   const tableBody = document.querySelector("#productsTable tbody");
   const productForm = document.getElementById("productForm");
   const modal = document.getElementById("productModal");
+  const productFilter = document.getElementById("productFilter");
+  const productSearch = document.getElementById("productSearch");
+
+  let activeFilter = "all";
 
   function renderTable() {
     const products = getProducts();
+    const searchTerm = productSearch?.value.toLowerCase() || "";
+    const filtered = products.filter(p => {
+      const matchesCat = activeFilter === "all" || p.category === activeFilter;
+      const matchesSearch = p.name.toLowerCase().includes(searchTerm) || p.barcode.toLowerCase().includes(searchTerm);
+      return matchesCat && matchesSearch;
+    });
     if (!tableBody) return;
     tableBody.innerHTML = "";
     
-    // Dynamic Category Dropdown for adding/editing products
+    const cats = getCategories();
+    // 1. Modal Category Dropdown (Adding/Editing Products)
     const catSelect = document.getElementById("prodCategory");
     if (catSelect) {
-      const cats = getCategories();
       catSelect.innerHTML = `<option value="" disabled selected>Select Category</option>` + 
                             cats.map(c => `<option value="${c.name}">${c.name}</option>`).join("");
     }
+    // 2. Toolbar Filter Dropdown
+    if (productFilter) {
+      const currentVal = productFilter.value;
+      productFilter.innerHTML = `<option value="all">All Categories</option>` + 
+                                cats.map(c => `<option value="${c.name}">${c.name}</option>`).join("");
+      if (Array.from(productFilter.options).some(opt => opt.value === currentVal)) {
+        productFilter.value = currentVal;
+      }
+    }
 
-    products.forEach(p => {
+    filtered.forEach(p => {
       const row = document.createElement("tr");
       const stockPercent = Math.min(100, Math.max(0, (p.stock / 20) * 100)); 
       const cat = (p.category || "").toLowerCase();
-      const artClass = cat.includes("sofa") || cat.includes("seating") ? "sofa-art" : 
-                       cat.includes("table") ? "table-art" :
-                       cat.includes("storage") ? "storage-art" : "bed-art";
+      const artClass = getCategoryArt(p.category, "");
 
       row.innerHTML = `
         <td><div class="table-visual"><span class="table-visual__icon ${artClass} mini-art"></span><div><strong>${p.name}</strong><small>${p.desc || p.barcode}</small></div></div></td>
@@ -1531,6 +1704,37 @@ function initProductsPage() {
       `;
       tableBody.appendChild(row);
     });
+
+    // Dynamic Top Category Cards
+    const visualCatGrid = document.querySelector(".visual-category-grid");
+    if (visualCatGrid && document.body.dataset.page === "products") {
+       const cats = getCategories();
+       
+       const allCard = `
+         <article class="furniture-card compact-card ${activeFilter === "all" ? 'active-card' : ''}" data-cat="all" style="cursor:pointer">
+           <div class="furniture-card__art all-art"></div>
+           <strong>All Products</strong>
+           <span>${products.length} items total</span>
+         </article>
+       `;
+
+       visualCatGrid.innerHTML = allCard + cats.map(c => `
+         <article class="furniture-card compact-card ${activeFilter === c.name ? 'active-card' : ''}" data-cat="${c.name}" style="cursor:pointer">
+           <div class="furniture-card__art ${getCategoryArt(c.name, c.tag)}"></div>
+           <strong>${c.name}</strong>
+           <span>${products.filter(p => p.category === c.name).length} items</span>
+         </article>
+       `).join("");
+
+       // Card click listeners
+       visualCatGrid.querySelectorAll(".furniture-card").forEach(card => {
+         card.addEventListener("click", () => {
+           activeFilter = card.dataset.cat;
+           if (productFilter) productFilter.value = activeFilter === "all" ? "all" : activeFilter;
+           renderTable();
+         });
+       });
+    }
 
     // Wire up dynamic buttons
     document.querySelectorAll(".edit-prod-btn").forEach(btn => {
@@ -1605,6 +1809,16 @@ function initProductsPage() {
      document.querySelector(".modal__header h2").textContent = "Add Product";
   });
 
+  if (productFilter) {
+    productFilter.addEventListener("change", (e) => {
+      activeFilter = e.target.value;
+      renderTable();
+    });
+  }
+  if (productSearch) {
+    productSearch.addEventListener("input", () => renderTable());
+  }
+
   renderTable();
 }
 
@@ -1636,6 +1850,18 @@ function initCustomersPage() {
       `;
       tableBody.appendChild(row);
     });
+
+    // Dynamic Top Stats
+    const statsGrid = document.querySelector(".card-grid");
+    if (statsGrid && document.body.dataset.page === "customers") {
+      const invoices = getInvoices();
+      const uniqueBuyers = new Set(invoices.map(i => i.customer)).size;
+      statsGrid.innerHTML = `
+        <article class="mini-card"><span>Total Registry</span><strong>${customers.length}</strong></article>
+        <article class="mini-card"><span>Active Buyers</span><strong>${uniqueBuyers}</strong></article>
+        <article class="mini-card"><span>New This Month</span><strong>${customers.length}</strong></article>
+      `;
+    }
 
     // Edit/Delete listeners
     document.querySelectorAll(".edit-cust-btn").forEach(btn => {
@@ -1787,6 +2013,7 @@ function initCategoriesPage() {
 function initDashboardPage() {
   const invoices = getInvoices();
   const products = getProducts();
+  const customers = getCustomers();
   const today = new Date().toISOString().split('T')[0];
   
   const todayInvoices = invoices.filter(inv => inv.date.startsWith(today));
@@ -1796,6 +2023,26 @@ function initDashboardPage() {
 
   const money = (v) => `Rs. ${Number(v).toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
 
+  // Update Sidebar & Header Balance (Cash in Hand)
+  const cashEls = document.querySelectorAll(".sidebar-metric strong, .due-box strong");
+  cashEls.forEach(el => el.textContent = money(totalSales));
+
+  // Update Dynamic Category Grid (Dashboard Top)
+  const dashboardCatGrid = document.querySelector(".content > .visual-category-grid");
+  if (dashboardCatGrid && body.dataset.page === "dashboard") {
+     const cats = getCategories();
+     dashboardCatGrid.innerHTML = cats.slice(0, 4).map(c => {
+       const count = products.filter(p => p.category === c.name).length;
+       return `
+         <article class="furniture-card">
+           <div class="furniture-card__art ${getCategoryArt(c.name, c.tag)}"></div>
+           <strong>${c.name}</strong>
+           <span>${count} items in stock</span>
+         </article>
+       `;
+     }).join("");
+  }
+
   // Update Quick Stats
   const todaySaleEl = document.querySelector(".quick-card.active-quick strong");
   if (todaySaleEl) todaySaleEl.textContent = money(todaySales);
@@ -1803,15 +2050,68 @@ function initDashboardPage() {
   const todayCountEl = document.querySelector(".quick-card.active-quick small");
   if (todayCountEl) todayCountEl.textContent = `${todayInvoices.length} invoices generated today`;
 
+  const payInEl = document.querySelectorAll(".quick-card strong")[1]; // Payment In
+  if (payInEl) payInEl.textContent = money(todaySales);
+  
+  const payInSmall = document.querySelectorAll(".quick-card small")[1];
+  if (payInSmall) payInSmall.textContent = `${todayInvoices.length} collections received`;
+
+  const payOutEl = document.querySelectorAll(".quick-card strong")[2]; // Payment Out
+  if (payOutEl) payOutEl.textContent = `Rs. 0`; // No expense tracker yet
+  
+  const payOutSmall = document.querySelectorAll(".quick-card small")[2];
+  if (payOutSmall) payOutSmall.textContent = `0 expenses recorded`;
+
   const lowStockEl = document.querySelector(".warning-card strong");
   if (lowStockEl) lowStockEl.textContent = String(lowStockCount).padStart(2, '0');
 
-  // Update Bottom Stats
-  const lifetimeSaleEl = document.querySelectorAll(".stat-card strong")[0];
-  if (lifetimeSaleEl) lifetimeSaleEl.textContent = money(totalSales);
+  // Update Bottom Stats (Total Sales, Total Products, Customer Count)
+  const statsList = document.querySelectorAll(".stats-grid--compact .stat-card strong");
+  if (statsList.length >= 3) {
+    statsList[0].textContent = money(totalSales);
+    statsList[1].textContent = products.length;
+    statsList[2].textContent = customers.length.toLocaleString();
+    if (statsList[3]) statsList[3].textContent = money(todaySales);
+  }
 
-  const revenueEl = document.querySelectorAll(".stat-card.accent-card strong")[0];
-  if (revenueEl) revenueEl.textContent = money(todaySales);
+  // Update Trend Captions
+  const now = new Date();
+  const currentMonth = now.getMonth();
+  const currentYear = now.getFullYear();
+  const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+  const thisMonthSales = invoices.filter(inv => {
+    const d = new Date(inv.date);
+    return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+  }).reduce((sum, inv) => sum + inv.total, 0);
+
+  const lastMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+  const lastMonthYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+  const lastMonthSales = invoices.filter(inv => {
+    const d = new Date(inv.date);
+    return d.getMonth() === lastMonth && d.getFullYear() === lastMonthYear;
+  }).reduce((sum, inv) => sum + inv.total, 0);
+
+  let salesTrendText = "Starting fresh this month";
+  if (lastMonthSales > 0) {
+    const diff = ((thisMonthSales - lastMonthSales) / lastMonthSales) * 100;
+    salesTrendText = `${diff >= 0 ? '+' : ''}${diff.toFixed(1)}% vs last month`;
+  }
+
+  const activeThisWeek = new Set(invoices.filter(inv => new Date(inv.date) >= oneWeekAgo).map(inv => inv.customer)).size;
+  const productsWithStock = products.filter(p => p.stock > 0).length;
+
+  const trendEls = document.querySelectorAll(".stats-grid--compact .stat-card .trend");
+  if (trendEls.length >= 3) {
+    trendEls[0].textContent = salesTrendText;
+    trendEls[1].textContent = `${productsWithStock} products with stock`;
+    trendEls[2].textContent = `${activeThisWeek} active buyers this week`;
+  }
+
+  const avgBillEl = document.querySelector(".stat-card.accent-card .trend");
+  if (avgBillEl && todayInvoices.length > 0) {
+    avgBillEl.textContent = `Average bill ${money(todaySales / todayInvoices.length)}`;
+  }
 
   // Update Recent Transactions Table
   const recentTableBody = document.querySelector(".panel .table-wrap tbody");
@@ -1830,6 +2130,9 @@ function initDashboardPage() {
       `).join("");
     }
   }
+
+  // Refresh Chart with real data
+  initChart();
 }
 
 // ── Reports / Invoices Page Logic ──
