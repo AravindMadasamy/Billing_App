@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SRI AYYAN Billing | Categories</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="categories">
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar__header">
+        <a class="brand" href="dashboard.html">
+          <span class="brand__mark">SA</span>
+          <div class="brand__text">
+            <strong>SRI AYYAN</strong>
+            <span>Furniture Billing</span>
+          </div>
+        </a>
+        <button class="icon-btn sidebar-toggle desktop-only" id="sidebarToggle">
+          <span></span><span></span>
+        </button>
+      </div>
+      <nav class="sidebar__nav">
+        <a href="dashboard.html" class="nav-link"><span>Dashboard</span></a>
+        <a href="products.html" class="nav-link"><span>Products</span></a>
+        <a href="categories.html" class="nav-link active"><span>Categories</span></a>
+        <a href="customers.html" class="nav-link"><span>Customers</span></a>
+        <a href="billing.html" class="nav-link"><span>Billing</span></a>
+        <a href="invoice.html" class="nav-link"><span>Reports</span></a>
+        <a href="settings.html" class="nav-link"><span>Settings</span></a>
+      </nav>
+      <div class="sidebar__footer">
+        <div class="theme-switch">
+          <span>Theme</span>
+          <button class="switch" id="themeToggle"></button>
+        </div>
+      </div>
+    </aside>
+
+    <div class="main-panel">
+      <header class="topbar">
+        <button class="icon-btn mobile-only" id="mobileSidebarToggle">
+          <span></span><span></span>
+        </button>
+        <div class="searchbar">
+          <input type="search" placeholder="Search categories...">
+        </div>
+        <div class="topbar__actions">
+          <button class="icon-btn bell-btn"><span class="dot"></span></button>
+          <div class="profile-menu">
+            <button class="profile-menu__trigger" id="profileTrigger">
+              <div class="avatar">A</div>
+              <div><strong>Admin</strong><span>Manager</span></div>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <main class="content">
+        <section class="page-heading">
+          <div>
+            <p class="eyebrow">Inventory Setup</p>
+            <h1>Categories</h1>
+            <p class="muted">Organize your products into logical groups for better reporting and POS access.</p>
+          </div>
+          <button class="btn btn-primary" data-modal-target="categoryModal">Add Category</button>
+        </section>
+
+        <section class="panel">
+          <div class="table-wrap">
+            <table id="categoriesTable">
+              <thead>
+                <tr>
+                  <th>Category Name</th>
+                  <th>Short Tag</th>
+                  <th>Description</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Dynamic Content -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <div class="modal" id="categoryModal">
+    <div class="modal__dialog">
+      <div class="modal__header">
+        <div>
+          <h2>Add Category</h2>
+          <p class="muted">Define a new product group.</p>
+        </div>
+        <button class="modal-close" data-modal-close>&times;</button>
+      </div>
+      <form class="modal__body form-grid" id="categoryForm">
+        <input type="hidden" id="editCategoryId">
+        <label class="field"><input type="text" id="catName" placeholder=" " required><span>Category Name</span></label>
+        <label class="field"><input type="text" id="catTag" placeholder=" " required maxlength="2"><span>Short Tag (2 chars)</span></label>
+        <label class="field full-span"><input type="text" id="catDesc" placeholder=" "><span>Description</span></label>
+        <div class="modal__actions full-span">
+          <button type="button" class="btn btn-secondary" data-modal-close>Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Category</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <script src="js/script.js"></script>
+</body>
+</html>

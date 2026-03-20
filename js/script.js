@@ -127,6 +127,23 @@ function saveCustomers(list) {
   localStorage.setItem("pos_customers", JSON.stringify(list));
 }
 
+// ── Category Management System ──
+const defaultCategories = [
+  { id: 1, name: "Seating", desc: "Sofas, chairs, recliners", tag: "SE" },
+  { id: 2, name: "Tables", desc: "Dining, coffee, office", tag: "TB" },
+  { id: 3, name: "Storage", desc: "Wardrobes and cabinets", tag: "ST" },
+  { id: 4, name: "Bedroom", desc: "Beds and nightstands", tag: "BD" }
+];
+
+function getCategories() {
+  const saved = localStorage.getItem("pos_categories");
+  return saved ? JSON.parse(saved) : defaultCategories;
+}
+
+function saveCategories(list) {
+  localStorage.setItem("pos_categories", JSON.stringify(list));
+}
+
 // Run applySettings immediately
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", applySettings);
@@ -759,6 +776,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initSettingsPage();
   initProductsPage();
   initCustomersPage();
+  initCategoriesPage();
 });
 
 
@@ -1438,6 +1456,14 @@ function initProductsPage() {
     if (!tableBody) return;
     tableBody.innerHTML = "";
     
+    // Dynamic Category Dropdown for adding/editing products
+    const catSelect = document.getElementById("prodCategory");
+    if (catSelect) {
+      const cats = getCategories();
+      catSelect.innerHTML = `<option value="" disabled selected>Select Category</option>` + 
+                            cats.map(c => `<option value="${c.name}">${c.name}</option>`).join("");
+    }
+
     products.forEach(p => {
       const row = document.createElement("tr");
       const stockPercent = Math.min(100, Math.max(0, (p.stock / 20) * 100)); 
@@ -1619,6 +1645,93 @@ function initCustomersPage() {
       modal.classList.remove("open");
       customerForm.reset();
       document.getElementById("editCustomerId").value = "";
+    });
+  }
+
+  renderTable();
+}
+
+function initCategoriesPage() {
+  const page = document.body.dataset.page;
+  if (page !== "categories") return;
+
+  const tableBody = document.querySelector("#categoriesTable tbody");
+  const categoryForm = document.getElementById("categoryForm");
+  const modal = document.getElementById("categoryModal");
+
+  function renderTable() {
+    const categories = getCategories();
+    if (!tableBody) return;
+    tableBody.innerHTML = "";
+
+    categories.forEach(c => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td><strong>${c.name}</strong></td>
+        <td><span class="category-pill">${c.tag || '-'}</span></td>
+        <td>${c.desc || '-'}</td>
+        <td>
+          <div class="table-actions">
+            <button class="btn btn-icon edit-cat-btn" data-id="${c.id}">Edit</button>
+            <button class="btn btn-danger btn-icon delete-cat-btn" data-id="${c.id}">Delete</button>
+          </div>
+        </td>
+      `;
+      tableBody.appendChild(row);
+    });
+
+    document.querySelectorAll(".edit-cat-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const id = Number(btn.dataset.id);
+        const c = getCategories().find(cat => cat.id === id);
+        if (c) {
+          document.getElementById("editCategoryId").value = id;
+          document.getElementById("catName").value = c.name;
+          document.getElementById("catTag").value = c.tag || "";
+          document.getElementById("catDesc").value = c.desc || "";
+          document.querySelector("#categoryModal h2").textContent = "Edit Category";
+          modal.classList.add("open");
+        }
+      });
+    });
+
+    document.querySelectorAll(".delete-cat-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        if (confirm("Are you sure? Items in this category will remains but category choice disappears.")) {
+          const id = Number(btn.dataset.id);
+          const filtered = getCategories().filter(cat => cat.id !== id);
+          saveCategories(filtered);
+          renderTable();
+        }
+      });
+    });
+  }
+
+  if (categoryForm) {
+    categoryForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const id = document.getElementById("editCategoryId").value;
+      const categories = getCategories();
+
+      const newCat = {
+        id: id ? Number(id) : Date.now(),
+        name: document.getElementById("catName").value,
+        tag: document.getElementById("catTag").value.toUpperCase(),
+        desc: document.getElementById("catDesc").value
+      };
+
+      if (id) {
+        const idx = categories.findIndex(c => c.id === Number(id));
+        if (idx > -1) categories[idx] = newCat;
+      } else {
+        categories.push(newCat);
+      }
+
+      saveCategories(categories);
+      renderTable();
+      modal.classList.remove("open");
+      categoryForm.reset();
+      document.getElementById("editCategoryId").value = "";
     });
   }
 

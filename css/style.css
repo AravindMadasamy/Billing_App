@@ -787,7 +787,9 @@ tbody tr:hover {
 .field input:focus + span,
 .field input:not(:placeholder-shown) + span,
 .field textarea:focus + span,
-.field textarea:not(:placeholder-shown) + span {
+.field textarea:not(:placeholder-shown) + span,
+.field select:focus + span,
+.field select:valid + span {
   transform: translateY(-22px) scale(0.9);
   color: var(--primary);
 }
