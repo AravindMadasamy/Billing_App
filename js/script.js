@@ -144,6 +144,23 @@ function saveCategories(list) {
   localStorage.setItem("pos_categories", JSON.stringify(list));
 }
 
+// ── Invoice / Sales Persistence System ──
+function getInvoices() {
+  const saved = localStorage.getItem("pos_invoices");
+  return saved ? JSON.parse(saved) : [];
+}
+
+function saveInvoices(list) {
+  localStorage.setItem("pos_invoices", JSON.stringify(list));
+}
+
+// Global Sync across Tabs
+window.addEventListener("storage", (e) => {
+  if (e.key === "pos_settings") {
+    applySettings();
+  }
+});
+
 // Run applySettings immediately
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", applySettings);
@@ -777,6 +794,8 @@ document.addEventListener("DOMContentLoaded", () => {
   initProductsPage();
   initCustomersPage();
   initCategoriesPage();
+  if (body.dataset.page === "dashboard") initDashboardPage();
+  if (body.dataset.page === "invoice") initReportsPage();
 });
 
 
@@ -1079,17 +1098,43 @@ function initBillingPOS() {
   document.getElementById("posCancelReceiptBtn")?.addEventListener("click", closeReceiptPreview);
 
   document.getElementById("posPrintReceiptBtn")?.addEventListener("click", () => {
-    // 1. Print it natively
+    // 1. Print natively
     window.print();
     
-    // 2. Wrap up
-    closeReceiptPreview();
-    
+    // 2. Save Invoice
     const s = getSettings();
     const sub = Array.from(items.values()).reduce((sum, item) => sum + item.price * item.qty, 0);
     const discount = Number(discountInput?.value || 0);
-    const total = sub + (sub * (s.gstRate / 100)) - discount;
+    const gstAmt = sub * (s.gstRate / 100);
+    const total = sub + gstAmt - discount;
+
+    const invoices = getInvoices();
+    const newInvoice = {
+      id: "INV-" + Date.now().toString().slice(-6),
+      date: new Date().toISOString(),
+      customer: document.getElementById("posCustomerInput")?.value || "Walking Customer",
+      itemsCount: Array.from(items.values()).reduce((sum, item) => sum + item.qty, 0),
+      subtotal: sub,
+      gst: gstAmt,
+      discount: discount,
+      total: total,
+      status: "Paid"
+    };
+    invoices.unshift(newInvoice);
+    saveInvoices(invoices);
+
+    // 3. Update stock levels
+    const products = getProducts();
+    items.forEach((item, barcode) => {
+      const p = products.find(prod => prod.barcode === barcode);
+      if (p) {
+        p.stock = Math.max(0, p.stock - item.qty);
+      }
+    });
+    saveProducts(products);
     
+    // 4. Wrap up
+    closeReceiptPreview();
     showToast("Bill Generated: " + money(total), "success");
     
     items.clear();
@@ -1736,6 +1781,80 @@ function initCategoriesPage() {
   }
 
   renderTable();
+}
+
+// ── Dashboard Page Logic ──
+function initDashboardPage() {
+  const invoices = getInvoices();
+  const products = getProducts();
+  const today = new Date().toISOString().split('T')[0];
+  
+  const todayInvoices = invoices.filter(inv => inv.date.startsWith(today));
+  const todaySales = todayInvoices.reduce((sum, inv) => sum + inv.total, 0);
+  const totalSales = invoices.reduce((sum, inv) => sum + inv.total, 0);
+  const lowStockCount = products.filter(p => p.stock < 10).length;
+
+  const money = (v) => `Rs. ${Number(v).toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
+
+  // Update Quick Stats
+  const todaySaleEl = document.querySelector(".quick-card.active-quick strong");
+  if (todaySaleEl) todaySaleEl.textContent = money(todaySales);
+  
+  const todayCountEl = document.querySelector(".quick-card.active-quick small");
+  if (todayCountEl) todayCountEl.textContent = `${todayInvoices.length} invoices generated today`;
+
+  const lowStockEl = document.querySelector(".warning-card strong");
+  if (lowStockEl) lowStockEl.textContent = String(lowStockCount).padStart(2, '0');
+
+  // Update Bottom Stats
+  const lifetimeSaleEl = document.querySelectorAll(".stat-card strong")[0];
+  if (lifetimeSaleEl) lifetimeSaleEl.textContent = money(totalSales);
+
+  const revenueEl = document.querySelectorAll(".stat-card.accent-card strong")[0];
+  if (revenueEl) revenueEl.textContent = money(todaySales);
+
+  // Update Recent Transactions Table
+  const recentTableBody = document.querySelector(".panel .table-wrap tbody");
+  if (recentTableBody) {
+    if (invoices.length === 0) {
+      recentTableBody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 2rem; color: var(--text-soft);">No transactions yet. Start billing to see data!</td></tr>`;
+    } else {
+      recentTableBody.innerHTML = invoices.slice(0, 5).map(inv => `
+        <tr>
+          <td>#${inv.id}</td>
+          <td>${inv.customer}</td>
+          <td>${inv.itemsCount}</td>
+          <td>${money(inv.total)}</td>
+          <td><span class="badge badge-success">${inv.status}</span></td>
+        </tr>
+      `).join("");
+    }
+  }
+}
+
+// ── Reports / Invoices Page Logic ──
+function initReportsPage() {
+  const invoices = getInvoices();
+  const tableBody = document.querySelector(".table-wrap table tbody");
+  if (!tableBody) return;
+
+  const money = (v) => `Rs. ${Number(v).toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
+
+  if (invoices.length === 0) {
+    tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding: 3rem; color: var(--text-soft);">No invoices found. Generate a bill first!</td></tr>`;
+    return;
+  }
+
+  tableBody.innerHTML = invoices.map(inv => `
+    <tr>
+      <td>#${inv.id}</td>
+      <td>${new Date(inv.date).toLocaleDateString()}</td>
+      <td>${inv.customer}</td>
+      <td>${inv.itemsCount} items</td>
+      <td>${money(inv.total)}</td>
+      <td><span class="badge badge-success">Paid</span></td>
+    </tr>
+  `).join("");
 }
 
 
