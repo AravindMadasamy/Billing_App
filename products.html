@@ -171,11 +171,23 @@
         </div>
         <button class="modal-close" data-modal-close>&times;</button>
       </div>
-      <form class="modal__body form-grid">
-        <label class="field"><input type="text" placeholder=" " required><span>Product Name</span></label>
-        <label class="field"><input type="text" placeholder=" " required><span>Category</span></label>
-        <label class="field"><input type="number" placeholder=" " required><span>Price</span></label>
-        <label class="field"><input type="number" placeholder=" " required><span>Stock Quantity</span></label>
+      <form class="modal__body form-grid" id="productForm">
+        <input type="hidden" id="editBarcode">
+        <label class="field"><input type="text" id="prodBarcode" placeholder=" " required><span>Barcode / SKU</span></label>
+        <label class="field"><input type="text" id="prodName" placeholder=" " required><span>Product Name</span></label>
+        <label class="field">
+          <select id="prodCategory" class="select-control" required style="padding: 0.8rem;">
+            <option value="Seating">Seating</option>
+            <option value="Tables">Tables</option>
+            <option value="Storage">Storage</option>
+            <option value="Bedroom">Bedroom</option>
+          </select>
+          <span>Category</span>
+        </label>
+        <label class="field"><input type="number" id="prodPrice" placeholder=" " required><span>Price (Rs.)</span></label>
+        <label class="field"><input type="number" id="prodStock" placeholder=" " required><span>Stock Quantity</span></label>
+        <label class="field full-span"><input type="text" id="prodDesc" placeholder=" "><span>Short Description</span></label>
+        
         <div class="modal__actions full-span">
           <button type="button" class="btn btn-secondary" data-modal-close>Cancel</button>
           <button type="submit" class="btn btn-primary">Save Product</button>

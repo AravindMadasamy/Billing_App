@@ -29,7 +29,17 @@ function applySettings() {
   const s = getSettings();
   
   // 1. Update Brand Text (Sidebar & Header)
-  document.querySelectorAll(".brand__text strong").forEach(el => el.textContent = s.shopName);
+  document.querySelectorAll(".brand__text strong, .navbar .brand").forEach(el => {
+    // For landing page brand, we want to keep the "SRI AYYAN" part but update it
+    if (el.classList.contains("brand") && !el.classList.contains("brand__text")) {
+      const subtitle = el.querySelector("span");
+      el.childNodes[0].textContent = s.shopName + " ";
+      if (subtitle) subtitle.textContent = s.shopTagline;
+    } else {
+      el.textContent = s.shopName;
+    }
+  });
+  
   document.querySelectorAll(".brand__text span").forEach(el => el.textContent = s.shopTagline);
   document.querySelectorAll(".brand__mark").forEach(el => {
     el.textContent = s.shopName.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
@@ -37,6 +47,7 @@ function applySettings() {
 
   // 2. Apply Custom Theme Color
   document.documentElement.style.setProperty("--primary", s.primaryColor);
+  document.documentElement.style.setProperty("--accent-color", s.primaryColor); // For landing page
   
   // Update theme color meta for mobile browser chrome
   let metaTheme = document.querySelector('meta[name="theme-color"]');
@@ -51,6 +62,24 @@ function applySettings() {
   if (document.title.includes("|")) {
     const parts = document.title.split("|");
     document.title = `${s.shopName} | ${parts[1].trim()}`;
+  } else if (document.body.dataset.page === "landing" || !document.body.dataset.page) {
+     // If it's the landing page (often no data-page or explicitly 'landing')
+     const parts = document.title.split("|");
+     if (parts.length > 1) {
+       document.title = `${s.shopName} | ${parts[1].trim()}`;
+     }
+  }
+
+  // 4. Landing Page Specific Blocks (Footer Contacts)
+  const footerEmail = document.querySelector('footer .footer-links li:nth-child(1) a');
+  const footerPhone = document.querySelector('footer .footer-links li:nth-child(2) a');
+  const footerAddr  = document.querySelector('footer .footer-links li:nth-child(3) a');
+  
+  if (footerPhone) footerPhone.textContent = s.phone;
+  if (footerAddr) footerAddr.textContent = s.address;
+  // Auto-generate email based on shop name if it looks like a placeholder
+  if (footerEmail && (footerEmail.textContent.includes("hello@") || footerEmail.textContent.includes("example.com"))) {
+    footerEmail.textContent = `contact@${s.shopName.toLowerCase().replace(/\s+/g, '')}.com`;
   }
 }
 
@@ -59,6 +88,43 @@ function saveSettings(newSettings) {
   const updated = { ...current, ...newSettings };
   localStorage.setItem("pos_settings", JSON.stringify(updated));
   applySettings();
+}
+
+// ── Product Inventory System ──
+const defaultProducts = [
+  { barcode: "890100100001", name: "Royal Sofa Set", price: 32000, tag: "SO", category: "Seating", stock: 14, desc: "3 seater premium sofa" },
+  { barcode: "890100100002", name: "Oak Dining Table", price: 24500, tag: "TB", category: "Tables", stock: 9, desc: "6 seat wooden dining" },
+  { barcode: "890100100003", name: "Classic Wardrobe", price: 28900, tag: "WR", category: "Storage", stock: 6, desc: "2 door storage unit" },
+  { barcode: "890100100004", name: "King Bed Frame", price: 39000, tag: "BD", category: "Bedroom", stock: 4, desc: "Solid wood bedroom piece" },
+  { barcode: "890100100005", name: "Accent Chair", price: 8600, tag: "CH", category: "Seating", stock: 12, desc: "Durable velvet chair" },
+  { barcode: "890100100006", name: "Coffee Table", price: 11200, tag: "CF", category: "Tables", stock: 8, desc: "Minimalist glass top" },
+  { barcode: "890100100007", name: "TV Unit", price: 15750, tag: "TV", category: "Storage", stock: 5, desc: "Modern wall unit" }
+];
+
+function getProducts() {
+  const saved = localStorage.getItem("pos_products");
+  return saved ? JSON.parse(saved) : defaultProducts;
+}
+
+function saveProducts(list) {
+  localStorage.setItem("pos_products", JSON.stringify(list));
+}
+
+// ── Customer Management System ──
+const defaultCustomers = [
+  { id: 1, name: "Sneha Verma", phone: "+91 98765 43210", address: "12 Lake View Road, Pune" },
+  { id: 2, name: "Amit Joshi", phone: "+91 99887 66554", address: "44 Green Park, Jaipur" },
+  { id: 3, name: "Karan Malhotra", phone: "+91 98111 22003", address: "22 Palm Avenue, Delhi" },
+  { id: 4, name: "Riya Kapoor", phone: "+91 99000 11223", address: "7 Cedar Street, Chandigarh" }
+];
+
+function getCustomers() {
+  const saved = localStorage.getItem("pos_customers");
+  return saved ? JSON.parse(saved) : defaultCustomers;
+}
+
+function saveCustomers(list) {
+  localStorage.setItem("pos_customers", JSON.stringify(list));
 }
 
 // Run applySettings immediately
@@ -480,27 +546,26 @@ function initModals() {
 }
 
 function initTableSearch() {
-  const productSearch = document.getElementById("productSearch");
-  const productFilter = document.getElementById("productFilter");
-  const rows = document.querySelectorAll("#productsTable tbody tr");
-
-  if (!productSearch || !rows.length) return;
-
-  const applyFilters = () => {
-    const keyword = productSearch.value.trim().toLowerCase();
-    const category = productFilter?.value || "all";
-
-    rows.forEach((row) => {
-      const text = row.innerText.toLowerCase();
-      const rowCategory = row.querySelector("[data-category]")?.dataset.category || "";
-      const keywordMatch = text.includes(keyword);
-      const categoryMatch = category === "all" || rowCategory === category;
-      row.style.display = keywordMatch && categoryMatch ? "" : "none";
+  const searchInputs = document.querySelectorAll('input[type="search"], .pos-barcode-input');
+  searchInputs.forEach(input => {
+    input.addEventListener("input", () => {
+      const query = input.value.trim().toLowerCase();
+      // Find the closest container to filter (panel, table-wrap, or the whole main area)
+      const container = input.closest(".panel") || input.closest(".main-panel") || input.closest("main") || document.body;
+      
+      // Target rows in tables, category cards, or POS quick cards
+      const rows = container.querySelectorAll("table tbody tr, .category-card, .pos-quick-card, .mini-card");
+      
+      rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        // Exception: If we are in POS, the barcode input shouldn't hide items in the cart, 
+        // only items in the quick grid or search results.
+        if (input.id === "posBarcodeInput" && row.closest(".pos-cart-container")) return;
+        
+        row.style.display = text.includes(query) ? "" : "none";
+      });
     });
-  };
-
-  productSearch.addEventListener("input", applyFilters);
-  productFilter?.addEventListener("change", applyFilters);
+  });
 }
 
 function updateBillSummary() {
@@ -692,6 +757,8 @@ document.addEventListener("DOMContentLoaded", () => {
   initInvoicePrint();
   initChart();
   initSettingsPage();
+  initProductsPage();
+  initCustomersPage();
 });
 
 
@@ -722,15 +789,7 @@ function initBillingPOS() {
   const panel = document.getElementById("posBarcodePanel");
   const scanMessage = document.getElementById("posScanMessage");
 
-  const catalog = [
-    { barcode: "890100100001", name: "Royal Sofa Set", price: 32000, tag: "SO", category: "Living Room" },
-    { barcode: "890100100002", name: "Oak Dining Table", price: 24500, tag: "TB", category: "Dining" },
-    { barcode: "890100100003", name: "Classic Wardrobe", price: 28900, tag: "WR", category: "Storage" },
-    { barcode: "890100100004", name: "King Bed Frame", price: 39000, tag: "BD", category: "Bedroom" },
-    { barcode: "890100100005", name: "Accent Chair", price: 8600, tag: "CH", category: "Seating" },
-    { barcode: "890100100006", name: "Coffee Table", price: 11200, tag: "CF", category: "Living Room" },
-    { barcode: "890100100007", name: "TV Unit", price: 15750, tag: "TV", category: "Living Room" }
-  ];
+  const catalog = getProducts();
 
   const byBarcode = new Map(catalog.map((p) => [p.barcode, p]));
   const items = new Map();
@@ -788,7 +847,8 @@ function initBillingPOS() {
 
   function renderQuick() {
     quickGrid.innerHTML = "";
-    catalog.slice(0, 6).forEach((p) => {
+    // Show all products in the quick grid instead of just first 6
+    catalog.forEach((p) => {
       const card = document.createElement("button");
       card.className = "pos-quick-card";
       card.type = "button";
@@ -1065,23 +1125,34 @@ function initBillingPOS() {
   }
 
   function processBarcode() {
-    const code = barcodeInput.value.trim();
-    if (!code) {
-      showToast("Enter a barcode first.", "error");
+    const query = barcodeInput.value.trim().toLowerCase();
+    if (!query) {
+      showToast("Enter a barcode or product name.", "error");
       keepFocus();
       return;
     }
 
-    const p = byBarcode.get(code);
+    // 1. Try Exact Barcode Match
+    let p = byBarcode.get(query);
+    
+    // 2. Try Fuzzy Match (Name or Partial Barcode)
+    if (!p) {
+      p = catalog.find(item => 
+        item.name.toLowerCase().includes(query) || 
+        item.barcode.includes(query) ||
+        (item.category && item.category.toLowerCase().includes(query))
+      );
+    }
+
     if (!p) {
       scanMessage.textContent = "Product not found";
-      showToast("Product not found", "error", "Add new product", () => showToast("Open Products page to add it.", "success"));
+      showToast("No match for: " + query, "error");
       barcodeInput.select();
       keepFocus();
       return;
     }
 
-    addItem(p, "barcode");
+    addItem(p, "search");
     barcodeInput.value = "";
     keepFocus();
   }
@@ -1352,6 +1423,206 @@ function initSettingsPage() {
       }
     });
   }
+}
+
+function initProductsPage() {
+  const page = document.body.dataset.page;
+  if (page !== "products") return;
+
+  const tableBody = document.querySelector("#productsTable tbody");
+  const productForm = document.getElementById("productForm");
+  const modal = document.getElementById("productModal");
+
+  function renderTable() {
+    const products = getProducts();
+    if (!tableBody) return;
+    tableBody.innerHTML = "";
+    
+    products.forEach(p => {
+      const row = document.createElement("tr");
+      const stockPercent = Math.min(100, Math.max(0, (p.stock / 20) * 100)); 
+      const cat = (p.category || "").toLowerCase();
+      const artClass = cat.includes("sofa") || cat.includes("seating") ? "sofa-art" : 
+                       cat.includes("table") ? "table-art" :
+                       cat.includes("storage") ? "storage-art" : "bed-art";
+
+      row.innerHTML = `
+        <td><div class="table-visual"><span class="table-visual__icon ${artClass} mini-art"></span><div><strong>${p.name}</strong><small>${p.desc || p.barcode}</small></div></div></td>
+        <td><span class="category-pill">${p.category}</span></td>
+        <td>Rs. ${p.price.toLocaleString("en-IN")}</td>
+        <td><div class="stock-indicator"><strong>${p.stock}</strong><span class="stock-indicator__bar"><i style="width:${stockPercent}%"></i></span></div></td>
+        <td>
+          <div class="table-actions">
+            <button class="btn btn-icon edit-prod-btn" data-barcode="${p.barcode}">Edit</button>
+            <button class="btn btn-danger btn-icon delete-prod-btn" data-barcode="${p.barcode}">Delete</button>
+          </div>
+        </td>
+      `;
+      tableBody.appendChild(row);
+    });
+
+    // Wire up dynamic buttons
+    document.querySelectorAll(".edit-prod-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const products = getProducts();
+        const p = products.find(prod => prod.barcode === btn.dataset.barcode);
+        if (p) {
+          document.getElementById("editBarcode").value = p.barcode;
+          document.getElementById("prodBarcode").value = p.barcode;
+          document.getElementById("prodName").value = p.name;
+          document.getElementById("prodCategory").value = p.category;
+          document.getElementById("prodPrice").value = p.price;
+          document.getElementById("prodStock").value = p.stock;
+          document.getElementById("prodDesc").value = p.desc || "";
+          document.querySelector(".modal__header h2").textContent = "Edit Product";
+          modal.classList.add("open");
+        }
+      });
+    });
+
+    document.querySelectorAll(".delete-prod-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        if (confirm("Are you sure you want to delete this product?")) {
+          const filtered = getProducts().filter(prod => prod.barcode !== btn.dataset.barcode);
+          saveProducts(filtered);
+          renderTable();
+        }
+      });
+    });
+  }
+
+  if (productForm) {
+    productForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const barcode = document.getElementById("prodBarcode").value;
+      const isEdit = document.getElementById("editBarcode").value;
+      
+      const products = getProducts();
+      const newProd = {
+        barcode: barcode,
+        name: document.getElementById("prodName").value,
+        category: document.getElementById("prodCategory").value,
+        price: Number(document.getElementById("prodPrice").value),
+        stock: Number(document.getElementById("prodStock").value),
+        desc: document.getElementById("prodDesc").value,
+        tag: document.getElementById("prodName").value.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2)
+      };
+
+      if (isEdit) {
+        const idx = products.findIndex(p => p.barcode === isEdit);
+        if (idx > -1) products[idx] = newProd;
+      } else {
+        if (products.some(p => p.barcode === barcode)) {
+          alert("Barcode already exists!");
+          return;
+        }
+        products.push(newProd);
+      }
+
+      saveProducts(products);
+      renderTable();
+      modal.classList.remove("open");
+      productForm.reset();
+      document.getElementById("editBarcode").value = "";
+      document.querySelector(".modal__header h2").textContent = "Add Product";
+    });
+  }
+
+  document.querySelector('[data-modal-target="productModal"]')?.addEventListener("click", () => {
+     productForm.reset();
+     document.getElementById("editBarcode").value = "";
+     document.querySelector(".modal__header h2").textContent = "Add Product";
+  });
+
+  renderTable();
+}
+
+function initCustomersPage() {
+  const page = document.body.dataset.page;
+  if (page !== "customers") return;
+
+  const tableBody = document.querySelector("#customersTable tbody");
+  const customerForm = document.getElementById("customerForm");
+  const modal = document.getElementById("customerModal");
+
+  function renderTable() {
+    const customers = getCustomers();
+    if (!tableBody) return;
+    tableBody.innerHTML = "";
+
+    customers.forEach(c => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td><strong>${c.name}</strong></td>
+        <td>${c.phone}</td>
+        <td>${c.address}</td>
+        <td>
+          <div class="table-actions">
+            <button class="btn btn-icon edit-cust-btn" data-id="${c.id}">Edit</button>
+            <button class="btn btn-danger btn-icon delete-cust-btn" data-id="${c.id}">Delete</button>
+          </div>
+        </td>
+      `;
+      tableBody.appendChild(row);
+    });
+
+    // Edit/Delete listeners
+    document.querySelectorAll(".edit-cust-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const id = Number(btn.dataset.id);
+        const c = getCustomers().find(cust => cust.id === id);
+        if (c) {
+          document.getElementById("editCustomerId").value = c.id;
+          document.getElementById("custName").value = c.name;
+          document.getElementById("custPhone").value = c.phone;
+          document.getElementById("custAddress").value = c.address;
+          document.querySelector("#customerModal h2").textContent = "Edit Customer";
+          modal.classList.add("open");
+        }
+      });
+    });
+
+    document.querySelectorAll(".delete-cust-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        if (confirm("Are you sure you want to delete this customer?")) {
+          const id = Number(btn.dataset.id);
+          const filtered = getCustomers().filter(cust => cust.id !== id);
+          saveCustomers(filtered);
+          renderTable();
+        }
+      });
+    });
+  }
+
+  if (customerForm) {
+    customerForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const id = document.getElementById("editCustomerId").value;
+      const customers = getCustomers();
+
+      const newCust = {
+        id: id ? Number(id) : Date.now(),
+        name: document.getElementById("custName").value,
+        phone: document.getElementById("custPhone").value,
+        address: document.getElementById("custAddress").value
+      };
+
+      if (id) {
+        const idx = customers.findIndex(c => c.id === Number(id));
+        if (idx > -1) customers[idx] = newCust;
+      } else {
+        customers.push(newCust);
+      }
+
+      saveCustomers(customers);
+      renderTable();
+      modal.classList.remove("open");
+      customerForm.reset();
+      document.getElementById("editCustomerId").value = "";
+    });
+  }
+
+  renderTable();
 }
 
 
